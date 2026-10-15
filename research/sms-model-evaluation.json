@@ -1,0 +1,72 @@
+{
+  "dataset": "UCI SMS Spam Collection",
+  "dataset_doi": "10.24432/C5CC84",
+  "license": "CC BY 4.0",
+  "dataset_sha256": "7d039a24a6083ed9ef0f806ebad56bbb976e3aeb8de05669173bfdc4996c239d",
+  "source_rows": 5574,
+  "unique_rows": 5159,
+  "conflicting_duplicate_rows_removed": 0,
+  "split_seed": "signalcheck-sms-group-split-v1",
+  "split": "70/15/15 stable SHA256 groups, not exact proportions",
+  "grouping": "case/punctuation/URL/number-normalized templates; exact duplicates removed; not all paraphrases deduplicated",
+  "group_overlap": 0,
+  "feature_count": 4000,
+  "threshold": -1.8752955197785046,
+  "test_used_for_training_or_threshold_selection": false,
+  "split_counts": {
+    "train": {
+      "messages": 3603,
+      "groups": 3550,
+      "labels": {
+        "ham": 3157,
+        "spam": 446
+      }
+    },
+    "validation": {
+      "messages": 756,
+      "groups": 748,
+      "labels": {
+        "spam": 96,
+        "ham": 660
+      }
+    },
+    "test": {
+      "messages": 800,
+      "groups": 791,
+      "labels": {
+        "ham": 700,
+        "spam": 100
+      }
+    }
+  },
+  "validation": {
+    "messages": 756,
+    "ham": 660,
+    "spam": 96,
+    "true_positive": 91,
+    "false_positive": 4,
+    "true_negative": 656,
+    "false_negative": 5,
+    "precision": 0.95789,
+    "recall": 0.94792,
+    "false_positive_rate": 0.00606,
+    "accuracy": 0.9881
+  },
+  "test_model_only": {
+    "messages": 800,
+    "ham": 700,
+    "spam": 100,
+    "true_positive": 95,
+    "false_positive": 8,
+    "true_negative": 692,
+    "false_negative": 5,
+    "precision": 0.92233,
+    "recall": 0.95,
+    "false_positive_rate": 0.01143,
+    "accuracy": 0.98375
+  },
+  "training_libraries": {
+    "numpy": "2.4.3",
+    "scikit-learn": "1.9.0"
+  }
+}
