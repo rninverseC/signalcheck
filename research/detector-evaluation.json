@@ -1,0 +1,66 @@
+{
+  "signal_threshold": 15,
+  "development_scenarios": {
+    "warning": "Authored cases used during development. Not independent accuracy evidence.",
+    "count": 46,
+    "baseline_v1": {
+      "true_positive": 12,
+      "false_positive": 6,
+      "true_negative": 16,
+      "false_negative": 12,
+      "messages": 46,
+      "precision": 0.66667,
+      "recall": 0.5,
+      "false_positive_rate": 0.27273,
+      "accuracy": 0.6087
+    },
+    "improved_v2": {
+      "true_positive": 24,
+      "false_positive": 0,
+      "true_negative": 22,
+      "false_negative": 0,
+      "messages": 46,
+      "precision": 1,
+      "recall": 1,
+      "false_positive_rate": 0,
+      "accuracy": 1
+    }
+  },
+  "public_sms_test": {
+    "warning": "Older SMS ham/spam labels, not phishing or email ground truth. No further tuning on these test results.",
+    "inference_parity_max_error": 1.0731859845236613e-10,
+    "baseline_v1": {
+      "true_positive": 8,
+      "false_positive": 0,
+      "true_negative": 700,
+      "false_negative": 92,
+      "messages": 800,
+      "precision": 1,
+      "recall": 0.08,
+      "false_positive_rate": 0,
+      "accuracy": 0.885
+    },
+    "improved_v2": {
+      "true_positive": 94,
+      "false_positive": 8,
+      "true_negative": 692,
+      "false_negative": 6,
+      "messages": 800,
+      "precision": 0.92157,
+      "recall": 0.94,
+      "false_positive_rate": 0.01143,
+      "accuracy": 0.9825
+    },
+    "runtime_model_only": {
+      "true_positive": 94,
+      "false_positive": 8,
+      "true_negative": 692,
+      "false_negative": 6,
+      "messages": 800,
+      "precision": 0.92157,
+      "recall": 0.94,
+      "false_positive_rate": 0.01143,
+      "accuracy": 0.9825
+    }
+  }
+}
