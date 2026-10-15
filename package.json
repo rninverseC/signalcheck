@@ -1,0 +1,13 @@
+{
+  "name": "signalcheck",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Explainable browser-only scam rules and a locally trained SMS spam classifier",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "start": "python3 -m http.server 4173 --bind 127.0.0.1 --directory dist",
+    "evaluate": "node scripts/evaluate-detector.mjs",
+    "train:sms": "python3 scripts/train_sms_model.py"
+  }
+}

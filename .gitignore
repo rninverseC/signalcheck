@@ -1,0 +1,10 @@
+research/data/
+node_modules/
+__pycache__/
+.DS_Store
+
+# Local hosting identity and credentials
+.openai/
+.env
+.env.*
+!.env.example
