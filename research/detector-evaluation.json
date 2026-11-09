@@ -14,7 +14,7 @@
       "false_positive_rate": 0.27273,
       "accuracy": 0.6087
     },
-    "improved_v2": {
+    "current": {
       "true_positive": 24,
       "false_positive": 0,
       "true_negative": 22,
@@ -26,41 +26,104 @@
       "accuracy": 1
     }
   },
-  "public_sms_test": {
-    "warning": "Older SMS ham/spam labels, not phishing or email ground truth. No further tuning on these test results.",
-    "inference_parity_max_error": 1.0731859845236613e-10,
-    "baseline_v1": {
-      "true_positive": 8,
+  "authored_email_scenarios": {
+    "warning": "Authored modern emails used during development. Not independent accuracy evidence.",
+    "count": 14,
+    "current": {
+      "true_positive": 6,
       "false_positive": 0,
-      "true_negative": 700,
-      "false_negative": 92,
-      "messages": 800,
+      "true_negative": 8,
+      "false_negative": 0,
+      "messages": 14,
       "precision": 1,
-      "recall": 0.08,
+      "recall": 1,
       "false_positive_rate": 0,
-      "accuracy": 0.885
+      "accuracy": 1
     },
-    "improved_v2": {
-      "true_positive": 94,
-      "false_positive": 8,
-      "true_negative": 692,
-      "false_negative": 6,
-      "messages": 800,
-      "precision": 0.92157,
-      "recall": 0.94,
-      "false_positive_rate": 0.01143,
-      "accuracy": 0.9825
+    "email_model_only": {
+      "true_positive": 6,
+      "false_positive": 0,
+      "true_negative": 8,
+      "false_negative": 0,
+      "messages": 14,
+      "precision": 1,
+      "recall": 1,
+      "false_positive_rate": 0,
+      "accuracy": 1
+    }
+  },
+  "public_text_test": {
+    "warning": "Public SMS ham, spam, and smishing labels (UCI 2011, Mendeley). Not modern-scam ground truth. No further tuning on these test results.",
+    "inference_parity_max_error": 1.4288925598293645e-10,
+    "baseline_v1": {
+      "true_positive": 7,
+      "false_positive": 0,
+      "true_negative": 774,
+      "false_negative": 140,
+      "messages": 921,
+      "precision": 1,
+      "recall": 0.04762,
+      "false_positive_rate": 0,
+      "accuracy": 0.84799
+    },
+    "current": {
+      "true_positive": 136,
+      "false_positive": 4,
+      "true_negative": 770,
+      "false_negative": 11,
+      "messages": 921,
+      "precision": 0.97143,
+      "recall": 0.92517,
+      "false_positive_rate": 0.00517,
+      "accuracy": 0.98371
     },
     "runtime_model_only": {
-      "true_positive": 94,
-      "false_positive": 8,
-      "true_negative": 692,
-      "false_negative": 6,
-      "messages": 800,
-      "precision": 0.92157,
-      "recall": 0.94,
-      "false_positive_rate": 0.01143,
-      "accuracy": 0.9825
+      "true_positive": 137,
+      "false_positive": 4,
+      "true_negative": 770,
+      "false_negative": 10,
+      "messages": 921,
+      "precision": 0.97163,
+      "recall": 0.93197,
+      "false_positive_rate": 0.00517,
+      "accuracy": 0.9848
+    }
+  },
+  "public_email_test": {
+    "warning": "Public email ham, spam, and phishing labels (SpamAssassin, Enron-Spam, Nazario). Sources differ in era and collection method. No further tuning on these test results.",
+    "inference_parity_max_error": 1.4092105260488097e-10,
+    "baseline_v1": {
+      "true_positive": 367,
+      "false_positive": 84,
+      "true_negative": 2736,
+      "false_negative": 2689,
+      "messages": 5876,
+      "precision": 0.81375,
+      "recall": 0.12009,
+      "false_positive_rate": 0.02979,
+      "accuracy": 0.52808
+    },
+    "current": {
+      "true_positive": 2704,
+      "false_positive": 76,
+      "true_negative": 2744,
+      "false_negative": 352,
+      "messages": 5876,
+      "precision": 0.97266,
+      "recall": 0.88482,
+      "false_positive_rate": 0.02695,
+      "accuracy": 0.92716
+    },
+    "runtime_model_only": {
+      "true_positive": 2699,
+      "false_positive": 21,
+      "true_negative": 2799,
+      "false_negative": 357,
+      "messages": 5876,
+      "precision": 0.99228,
+      "recall": 0.88318,
+      "false_positive_rate": 0.00745,
+      "accuracy": 0.93567
     }
   }
 }

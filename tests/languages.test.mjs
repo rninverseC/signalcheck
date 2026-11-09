@@ -43,7 +43,7 @@ const scenarios = [
 for (const [language, message, id] of scenarios) test(`${language}: ${id}: ${message}`, () => {
   const result = check(message, language);
   assert.ok(has(result, id), result.findings.map(f => f.id).join(', '));
-  assert.equal(result.smsModel, null);
+  assert.equal(result.model, null);
   for (const finding of result.findings) for (const evidence of finding.evidence) if (evidence.source === 'message') assert.equal(result.message.slice(evidence.start, evidence.end), evidence.text);
 });
 
@@ -58,7 +58,7 @@ test('Chinese punctuation does not become part of a link destination', () => {
 test('native bank examples detect money and secrecy without running the English model', () => {
   for (const sample of [SAMPLES.spanish, SAMPLES.chinese]) {
     const result = analyzeMessage(sample); assert.equal(result.level, 'high');
-    assert.ok(has(result, 'safe-account')); assert.ok(has(result, 'secrecy')); assert.equal(result.smsModel, null);
+    assert.ok(has(result, 'safe-account')); assert.ok(has(result, 'secrecy')); assert.equal(result.model, null);
   }
 });
 test('ordinary conversations, gift-card shopping, code notices and safety advice are not theft requests', () => {
@@ -82,7 +82,7 @@ test('native clause negation does not hide a new positive request', () => {
 });
 test('translated evidence retains separate offsets and cannot rewrite original destinations', () => {
   const result = check('請閱讀通知： https://paypal.com@evil.example/login。', 'zh-Hant', {translation:'Send your password now. Visit https://www.paypal.com/login.'});
-  assert.equal(result.coverage, 'translation-assisted'); assert.equal(result.smsModel, null);
+  assert.equal(result.coverage, 'translation-assisted'); assert.equal(result.model, null);
   assert.equal(result.links.length, 1); assert.equal(result.links[0].host, 'evil.example');
   assert.ok(has(result, 'userinfo-link'));
   const credential = result.findings.find(f => f.id === 'credentials');
@@ -104,7 +104,7 @@ test('a translated sign-in signal requires a link in the original, not an invent
 });
 test('script mismatch yields a limited check rather than a reassuring low label', () => {
   const result = check('Ваш код проверки 123456. Никому не сообщайте.', 'en');
-  assert.equal(result.coverage, 'limited'); assert.equal(result.label, 'Limited check'); assert.equal(result.smsModel, null);
+  assert.equal(result.coverage, 'limited'); assert.equal(result.label, 'Limited check'); assert.equal(result.model, null);
   assert.equal(check('请提供验证码。', 'en').coverage, 'limited');
   assert.throws(() => check('Hello.', 'fr'), /Choose English/);
   assert.throws(() => check('你好。', 'zh', {translation:'x'.repeat(20001)}), /translation under/);

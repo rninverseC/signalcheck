@@ -1,5 +1,5 @@
 // Presentation only: these explanations never change a detector decision.
-import { displayedLinkMismatches } from './link-checks.mjs?v=3.0.0';
+import { displayedLinkMismatches } from './link-checks.mjs?v=3.1.0';
 const explain = (why, next, limit) => ({ why, next, limit });
 export const EXPLANATIONS = {
   credentials: explain('A password or sign-in code can give someone access to your account. A request to share one deserves a pause.', 'Do not send the password or code in a reply. If you need to sign in, open the official app yourself.', 'Entering a password in a real sign-in screen can be normal. This checker cannot verify who is asking.'),
@@ -30,10 +30,11 @@ export const EXPLANATIONS = {
   'brand-sender': explain('The domain—the part of an email address after @—does not match the organization the message appears to claim.', 'Check the request using contact information you already trust.', 'Outsourced senders can be legitimate, and displayed email addresses can be spoofed. No sender authentication was performed.'),
   'login-link': explain('A link that asks you to sign in could lead to a page designed to collect your account details.', 'Open the official app or type a known address yourself to check the request.', 'Real sign-in messages exist. This checker does not establish whether this login page is genuine.'),
   'toll-payment': explain('Unexpected texts about unpaid tolls can lead to a fake payment page.', 'Check your toll balance through the agency’s known website rather than this text’s link.', 'The checker does not know whether you actually owe a toll or whether the agency sent the text.'),
-  'sms-pattern': explain('The overall wording resembles older examples of unsolicited text messages that the model learned from.', 'Check whether you expected the message. Verify any unusual request through a trusted source.', 'Spam can be advertising rather than a scam. The model does not know who sent the message or whether you wanted it.'),
+  'text-pattern': explain('The overall wording resembles public examples of spam and smishing texts that the model learned from.', 'Check whether you expected the message. Verify any unusual request through a trusted source.', 'Spam can be advertising rather than a scam. The model does not know who sent the message or whether you wanted it.'),
+  'email-pattern': explain('The overall wording resembles public examples of spam and phishing emails that the model learned from.', 'Check whether you expected the email. Open the organization’s app or website yourself instead of using its links.', 'Spam can be advertising rather than a scam, and genuine account or billing notices can use similar words. The model does not know who sent the email or whether you wanted it.'),
 };
 
-export const FAMILY_NAMES = { sensitive: 'Sensitive details', money: 'Money requests', pressure: 'Pressure tactics', identity: 'Identity and domain clues', technical: 'Link and file clues', offer: 'Offers and SMS patterns', access: 'Remote access', greeting: 'Greeting' };
+export const FAMILY_NAMES = { sensitive: 'Sensitive details', money: 'Money requests', pressure: 'Pressure tactics', identity: 'Identity and domain clues', technical: 'Link and file clues', offer: 'Offers and learned patterns', access: 'Remote access', greeting: 'Greeting' };
 
 const languageLabel = code => code === 'es' ? 'Spanish' : code?.startsWith('zh') ? 'Chinese' : 'message';
 
@@ -44,7 +45,7 @@ export function getFindingExplanation(finding, result) {
   const mismatch = finding.id === 'displayed-link' ? displayedLinkMismatches(result.message).find(item => finding.evidence.some(e => e.start === item.evidence.start)) : null;
   const found = mismatch ? `The visible address names ${mismatch.displayedHost}, but the pasted link points to ${mismatch.actualHost}.`
     : finding.evidence.some(item => item.source === 'translation') && !finding.evidence.some(item => item.source === 'message') ? 'The English translation contains the wording below. Compare it with the original message.'
-    : finding.id === 'sms-pattern' ? 'An on-device pattern check flagged the overall wording.'
+    : /^(?:text|email)-pattern$/.test(finding.id) ? 'An on-device pattern check flagged the overall wording.'
     : finding.id === 'brand-sender' ? `Sender domain: ${result.senderDomain || 'not available'}.`
       : destinations.length ? `Actual link ${destinations.length === 1 ? 'destination' : 'destinations'}: ${destinations.join(', ')}.`
         : 'The message contains the wording below.';
@@ -53,7 +54,7 @@ export function getFindingExplanation(finding, result) {
       : `${finding.weight} points counted toward the total.`;
   const translatedOnly = finding.evidence.length && finding.evidence.every(item => item.source === 'translation');
   const limit = translatedOnly ? `${copy.limit} This evidence comes from a translation, which can alter the original meaning.` : copy.limit;
-  return { ...copy, limit, found, counted, family: FAMILY_NAMES[finding.group] || finding.group, method: finding.basis === 'local SMS model' ? 'A learned SMS wording pattern' : finding.basis === 'English translation rule' ? 'An English rule applied to the translation' : /request rule/.test(finding.basis) ? `A configured ${languageLabel(result.language)} request check` : 'A configured message or link check', technical: finding.explanation };
+  return { ...copy, limit, found, counted, family: FAMILY_NAMES[finding.group] || finding.group, method: finding.basis === 'local text model' ? 'A learned text-message wording pattern' : finding.basis === 'local email model' ? 'A learned email wording pattern' : finding.basis === 'English translation rule' ? 'An English rule applied to the translation' : /request rule/.test(finding.basis) ? `A configured ${languageLabel(result.language)} request check` : 'A configured message or link check', technical: finding.explanation };
 }
 
 export function getScoreExplanation(result) {

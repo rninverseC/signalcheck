@@ -1,10 +1,10 @@
 # SignalCheck
 
-An explainable, browser-only email and text checker. Version 3 adds Spanish and Chinese request checks and optional on-device English translation to contextual English scam rules, local link inspection, and a small English SMS spam classifier. No paid API or server-side message analysis.
+An explainable, browser-only email and text checker. It combines contextual English scam rules, Spanish and Chinese request checks, optional on-device English translation, local link inspection, and two small learned classifiers—one for texts and one for emails—trained on public spam, smishing, and phishing corpora. No paid API or server-side message analysis.
 
 ## Run or publish
 
-The complete website is in `dist/`; it uses HTML, CSS, and JavaScript modules with no build step or npm dependencies. The project includes 113 automated checks, detector research scripts, a model card, and a beginner learning guide.
+The complete website is in `dist/`; it uses HTML, CSS, and JavaScript modules with no build step or npm dependencies. The project includes 116 automated checks, detector research scripts, a model card, and a beginner learning guide.
 
 - **Run:** `npm start`, then open `http://127.0.0.1:4173` (Python 3 required).
 - **Test:** `npm test` (Node.js 18 or later).
@@ -14,11 +14,11 @@ The complete website is in `dist/`; it uses HTML, CSS, and JavaScript modules wi
 
 Run `npm start` from this directory and open `http://127.0.0.1:4173`. The convenience command requires Python 3; any static HTTP server can serve `dist/`. Use HTTP rather than opening the HTML as a file, because the application uses JavaScript modules.
 
-Run `npm test` with Node.js 18 or later. There are no npm packages to install. The learned model is already included, so normal use and tests do not need Python machine-learning libraries.
+Run `npm test` with Node.js 18 or later. There are no npm packages to install. The learned models are already included, so normal use and tests do not need Python machine-learning libraries.
 
 ## Plain-language explanations and learning
 
-Each finding now shows what was found, why it matters, what to do, and what remains unknown. Technical detection details and point contributions are expandable. Guided bank, sign-in-code, and deadline examples help first-time users explore the distinction between a dangerous request and weak contextual clues. The website also includes a beginner walkthrough of rules, the SMS model, scoring, and evaluation. See [LEARNING_GUIDE.md](LEARNING_GUIDE.md) for a self-guided explanation and first testing session. These presentation changes do not alter detector decisions or the recorded benchmark.
+Each finding now shows what was found, why it matters, what to do, and what remains unknown. Technical detection details and point contributions are expandable. Guided bank, sign-in-code, and deadline examples help first-time users explore the distinction between a dangerous request and weak contextual clues. The website also includes a beginner walkthrough of rules, the learned models, scoring, and evaluation. See [LEARNING_GUIDE.md](LEARNING_GUIDE.md) for a self-guided explanation and first testing session. These presentation changes do not alter detector decisions or the recorded benchmark.
 
 ## Languages and translation (version 3)
 
@@ -28,7 +28,14 @@ For Spanish or Chinese, optionally expand **Add an English translation**. **Tran
 
 English rules also inspect a supplied translation. Evidence is explicitly labeled original or translated and retains separate character offsets. The same signal counts once across both versions. Links are extracted only from the original message; a translation cannot invent or replace checked destinations. Both Chinese writing systems use the same rule set. A clearly mismatched writing system shows **Limited check** rather than a reassuring low result.
 
-The trained English SMS model is **skipped for all non-English and translated messages**. There is no independent multilingual or translation-assisted accuracy benchmark. The new authored tests cover behavior and regression scenarios, not measured real-world accuracy. The English held-out evaluation was rerun and has unchanged aggregate results (94/100 spam, 8/700 ordinary). Translation can lose negation, change requests, or alter context. Direct wording rules also miss unfamiliar phrasing.
+The trained English text and email models are **skipped for all non-English and translated messages**. There is no independent multilingual or translation-assisted accuracy benchmark. The authored tests cover behavior and regression scenarios, not measured real-world accuracy. Translation can lose negation, change requests, or alter context. Direct wording rules also miss unfamiliar phrasing.
+
+## Learned text and email models (version 3.1)
+
+- **Text model:** trained on the UCI SMS Spam Collection plus the Mendeley SMS Phishing dataset (ham, spam, and smishing). Used for English texts of up to 180 tokens.
+- **Email model:** trained on the Apache SpamAssassin corpus, Enron-Spam, and the Nazario phishing corpus. Used for English emails of at least 20 tokens; only the first 400 tokens are scored. Shorter emails rely on the rules.
+- Both are TF-IDF + logistic regression, exported as JavaScript and run in the browser. A match adds one explained signal ("Wording resembles spam or phishing emails" / "spam or smishing texts") with supporting word associations.
+- The training pipeline downloads every corpus from [research/data-sources.json](research/data-sources.json) with SHA-256 checks, removes duplicates, groups templates before splitting, picks thresholds on validation only, and saves the prepared splits so a future optional server-side model can train and be compared on exactly the same data.
 
 ## What's improved in version 2
 
@@ -42,9 +49,20 @@ The trained English SMS model is **skipped for all non-English and translated me
 
 ## Evidence, with its limits
 
-On the fixed, held-out UCI SMS test set of 800 messages, v2 flagged **94 of 100 spam messages** and **8 of 700 ordinary messages** at a signal score of 15 or higher. Version 1 flagged 8 spam messages and none of the ordinary messages on the same set. Increasing sensitivity introduced false alarms.
+Held-out public test splits, never used for training or threshold selection ("flagged" = signal score of 15 or more for the full checker):
 
-Those are historical **SMS spam labels**, not a measured rate of phishing detection, email accuracy, or modern scam detection. The 46 authored development scenarios were used to improve the rules; they are regression checks, not independent accuracy evidence. See [MODEL_CARD.md](MODEL_CARD.md), [detector evaluation](research/detector-evaluation.json), and [training evaluation](research/sms-model-evaluation.json).
+| Test split | Component | Suspicious flagged | Ordinary flagged |
+| --- | --- | ---: | ---: |
+| Text: 147 spam/smishing, 774 ordinary | Frozen v1 rules | 7 (4.8%) | 0 (0%) |
+| | Text model | 137 (93.2%) | 4 (0.5%) |
+| | Full checker | 136 (92.5%) | 4 (0.5%) |
+| Email: 3,056 spam/phishing, 2,820 ordinary | Frozen v1 rules | 367 (12.0%) | 84 (3.0%) |
+| | Email model | 2,699 (88.3%) | 21 (0.7%) |
+| | Full checker | 2,704 (88.5%) | 76 (2.7%) |
+
+The email model also flagged 360 of 426 (84.5%) later-year 2025 phishing emails held out from all splits.
+
+These are **public-corpus labels, mostly from older data**, not a measured rate of modern scam detection. Spam includes advertising. Ordinary and phishing email come from different collections, so the model can partly learn source style; genuine account-security notices share vocabulary with phishing. The full checker's extra email false positives come mainly from link rules flagging plain `http://` links in 2002-era mailing-list mail. The 46 authored development scenarios and 14 authored emails were used during development; they are regression checks, not independent accuracy evidence. See [MODEL_CARD.md](MODEL_CARD.md), [detector evaluation](research/detector-evaluation.json), and [training evaluation](research/model-evaluation.json).
 
 ## Reproduce the research
 
@@ -52,14 +70,16 @@ The public raw corpus is ignored by Git and excluded from the website. To reprod
 
 ```sh
 python3 -m pip install -r scripts/requirements-research.txt
-python3 scripts/fetch_sms_data.py
-npm run train:sms
-npm run evaluate
+npm run fetch-data   # downloads and verifies the public corpora into research/data/raw/
+npm run train        # trains both models, writes dist/*-model.mjs and research/model-evaluation.json
+npm run evaluate     # end-to-end checker evaluation and JavaScript/Python parity
 ```
 
-The downloader verifies the corpus SHA-256 against the recorded evaluation. Training uses only training data to learn the vocabulary and coefficients, and only validation data to select its threshold. Normalized templates are grouped before splitting. The test split is not used to choose features, coefficients, or thresholds. JavaScript inference is checked against Python on the held-out messages.
+The downloader verifies every file's SHA-256 against [research/data-sources.json](research/data-sources.json). Training uses only training data to learn the vocabulary and coefficients, and only validation data to choose regularization and the threshold. Normalized templates are grouped before splitting. The test split is not used to choose features, coefficients, or thresholds. JavaScript inference is checked against Python on every held-out message.
 
-`npm run evaluate` without the ignored corpus reports that the public SMS test is unavailable; it can still run the authored scenarios. Reproduction can vary slightly across platforms and library versions; the recorded versions are pinned in `scripts/requirements-research.txt`.
+Training also writes the prepared splits to `research/data/splits/{text,email}-{train,validation,test}.jsonl` (plus `email-future.jsonl`). A future server-side model should train on these files and report on the same test split so it can be compared directly with the browser models.
+
+`npm run evaluate` without the ignored corpora reports that the public tests are unavailable; it still runs the authored scenarios. Reproduction can vary slightly across platforms and library versions; the recorded versions are pinned in `scripts/requirements-research.txt`.
 
 ## Privacy and hosting
 
@@ -69,25 +89,25 @@ Copy report explicitly copies matched evidence to your clipboard. Static hosting
 
 ## What the score means
 
-Each distinct signal contributes a weight. Related families have caps: sensitive requests 45, money requests 45, pressure 24, identity 30, technical link/file cues 40, offers and learned SMS resemblance 28, remote access 40, and generic greetings 4. The total is capped at 100. Scores 0–14 show few signals, 15–34 show some concern, and 35–100 show high concern.
+Each distinct signal contributes a weight. Related families have caps: sensitive requests 45, money requests 45, pressure 24, identity 30, technical link/file cues 40, offers and learned text/email resemblance 28, remote access 40, and generic greetings 4. The total is capped at 100. Scores 0–14 show few signals, 15–34 show some concern, and 35–100 show high concern.
 
-Weights and thresholds are design choices, not fraud probabilities. The SMS model's raw decision margin is not shown as a fraud probability. A low score cannot establish that a message is safe. A high score cannot establish that it is fraudulent.
+Weights and thresholds are design choices, not fraud probabilities. The learned models' raw decision margins are not fraud probabilities. A low score cannot establish that a message is safe. A high score cannot establish that it is fraudulent.
 
 ## Remaining limitations
 
-The three supported languages still miss unfamiliar phrasing, unsupported languages, images, indirect social engineering, and many obfuscations. The SMS model was trained on a small, older corpus and is not evaluated on email. It is only used for English texts and is not used for texts over 180 tokens or with fewer than three known vocabulary tokens.
+The three supported languages still miss unfamiliar phrasing, unsupported languages, images, indirect social engineering, and many obfuscations. The learned models are trained on public corpora that are mostly older and do not represent all current scams or ordinary mail. They are used only for English messages: texts of up to 180 tokens, and emails of at least 20 tokens. They do not understand negation or intent, so safety advice that discusses scams can resemble scams.
 
 The checker does not authenticate senders, examine full email headers, scan files, resolve redirects, query live reputation, or know whether you expected a message. Only explicitly pasted HTML/Markdown links can be inspected for hidden destinations; a destination lost during plain-text copying cannot be recovered. Brand/domain comparisons cover a small, incomplete list and can flag legitimate vendors or unrelated names. Negation and educational-context handling are approximate. Unicode normalization is not comprehensive confusable-character detection.
 
 ## Sources and attribution
 
-Model data: Almeida, T. & Hidalgo, J. (2011), [SMS Spam Collection](https://doi.org/10.24432/C5CC84), UCI Machine Learning Repository, adapted under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Model weights are derived from this dataset after normalization, duplicate removal, grouped splitting, TF-IDF feature extraction, and logistic-regression training. Raw corpus messages are not published with the Site. No endorsement is implied.
+Model data (details and licenses in [research/data-sources.json](research/data-sources.json) and [MODEL_CARD.md](MODEL_CARD.md)): Almeida & Hidalgo (2011), [SMS Spam Collection](https://doi.org/10.24432/C5CC84), CC BY 4.0; Mishra & Soni, [SMS Phishing Dataset](https://doi.org/10.17632/f45bkkt8pr.1), CC BY 4.0; [Apache SpamAssassin public corpus](https://spamassassin.apache.org/old/publiccorpus/); Metsis, Androutsopoulos & Paliouras, [Enron-Spam](https://github.com/MWiechmann/enron_spam_data); J. Nazario, [phishing corpus](https://monkey.org/~jose/phishing/), CC BY 4.0. Model weights are derived from these datasets after normalization, duplicate removal, grouped splitting, TF-IDF feature extraction, and logistic-regression training. Raw corpus messages are not published with the Site. No endorsement is implied.
 
 Scam rules draw on FTC guidance about [phishing](https://consumer.ftc.gov/articles/how-recognize-avoid-phishing-scams), [task scams](https://consumer.ftc.gov/consumer-alerts/2024/11/task-scams-create-illusion-making-money), [safe-account impersonation](https://consumer.ftc.gov/consumer-alerts/2024/06/got-call-about-fraud-activity-your-bank-account-it-could-be-scammer), [toll texts](https://consumer.ftc.gov/consumer-alerts/2025/01/got-text-about-unpaid-tolls-its-probably-scam), and [fake checks](https://consumer.ftc.gov/consumer-alerts/2020/02/ftc-bottom-line-fake-checks-scams). The implementation and weights are original design choices, not FTC-endorsed detection rules.
 
 ## Explain the project
 
-Describe the project as a hybrid of explainable scam rules and an on-device statistical SMS spam model. Explain the difference between training, validation, and test sets, why related signals have caps, and the sensitivity/false-alarm tradeoff. For a portfolio, document what you personally designed, investigated, tested, or improved, and credit AI assistance according to the applicable application requirements.
+Describe the project as a hybrid of explainable scam rules and on-device statistical text and email models. Explain the difference between training, validation, and test sets, why related signals have caps, and the sensitivity/false-alarm tradeoff. For a portfolio, document what you personally designed, investigated, tested, or improved, and credit AI assistance according to the applicable application requirements.
 
 ## Source map
 
@@ -98,12 +118,13 @@ Describe the project as a hybrid of explainable scam rules and an on-device stat
 - `tests/languages.test.mjs` — multilingual evidence, scoring, original-link preservation, fallback, and cancellation checks.
 - `dist/text-utils.mjs` — normalization, evidence mapping, and local negation.
 - `dist/link-checks.mjs` — local hostname and pasted-link inspection.
-- `dist/sms-classifier.mjs`, `dist/sms-model.mjs` — local learned inference and weights.
+- `dist/message-classifier.mjs`, `dist/text-model.mjs`, `dist/email-model.mjs` — local learned inference and weights.
 - `dist/app.mjs`, `dist/index.html`, `dist/styles.css`, `dist/layout.css` — interface.
 - `tests/` — functional and authored scenario checks.
-- `scripts/` — research data download, training, and evaluation.
+- `scripts/` — research data download (`fetch_training_data.py`), corpus parsing (`corpora.py`), training (`train_models.py`), and evaluation.
+- `research/data-sources.json` — dataset provenance, licenses, and checksums.
 - `research/baseline-v1.mjs` — frozen original detector for comparison.
 - `.github/workflows/publish.yml` — manually started GitHub Pages publishing workflow.
 - `DEPLOYMENT.md` — independent publishing instructions.
 
-Release note: browser asset query versions are advanced for each interface release so cached modules do not hide updated explanations. The detector and interface version are 3.0.0. The English SMS model weights are unchanged.
+Release note: browser asset query versions are advanced for each interface release so cached modules do not hide updated explanations. The detector and interface version are 3.1.0, which replaces the SMS-only model with separate text and email models.
