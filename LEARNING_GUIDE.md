@@ -86,22 +86,22 @@ Training examples teach the vocabulary and model coefficients. Validation exampl
 
 If you repeatedly change the model to fit its test messages, those messages stop being a fair independent check. This project removes duplicates and keeps normalized message templates together before splitting, though similar paraphrases can still escape the grouping.
 
-The email model's held-out test includes 3,056 spam or phishing emails and 2,820 ordinary emails:
+The email model's held-out test includes 3,437 spam or phishing emails and 3,001 ordinary emails:
 
 | Actual message | Flagged | Not flagged |
 | --- | ---: | ---: |
-| Spam or phishing | 2,699 | 357 |
-| Ordinary | 21 | 2,799 |
+| Spam or phishing | 3,083 | 354 |
+| Ordinary | 29 | 2,972 |
 
-- A **false positive** is an ordinary message flagged: 21 here.
-- A **false negative** is a suspicious message missed: 357 here.
-- **Recall** asks “how much of the suspicious mail did we flag?”: 2,699/3,056 ≈ 88.3%.
-- **Precision** asks “how much of what we flagged was labeled suspicious?”: 2,699/(2,699+21) ≈ 99.2%.
-- The ordinary-message false-positive rate is 21/2,820 ≈ 0.7%.
+- A **false positive** is an ordinary message flagged: 29 here.
+- A **false negative** is a suspicious message missed: 354 here.
+- **Recall** asks “how much of the suspicious mail did we flag?”: 3,083/3,437 ≈ 89.7%.
+- **Precision** asks “how much of what we flagged was labeled suspicious?”: 3,083/(3,083+29) ≈ 99.1%.
+- The ordinary-message false-positive rate is 29/3,001 ≈ 1.0%.
 
 The text model's test (147 suspicious, 774 ordinary) flagged 137 suspicious and 4 ordinary texts.
 
-These figures describe public, mostly older corpora. They do not establish how well the checker detects today's scams. The ordinary and phishing emails also come from different collections, so part of what the model learned may be collection style rather than scam wording. The authored scenarios and guided examples were used during development; they are not independent accuracy evidence.
+These figures describe public, mostly older corpora plus one synthetic modern set. They do not establish how well the checker detects today's scams. The ordinary and phishing emails also come from different collections, so part of what the model learned may be collection style rather than scam wording. The authored scenarios and guided examples were used during development; they are not independent accuracy evidence.
 
 Read: `MODEL_CARD.md`, `research/detector-evaluation.json`, and `scripts/evaluate-detector.mjs`.
 

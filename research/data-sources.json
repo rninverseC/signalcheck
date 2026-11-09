@@ -166,6 +166,20 @@
           "sha256": "f1fa7e0fe35c9a16f36d9aa20ade7e1d3908d1d0c1d917b8c53c8aa799ec1c8f"
         }
       ]
+    },
+    {
+      "id": "llmgen-phishing",
+      "model": "email",
+      "title": "LLM-Generated Phishing Email Dataset, English part (synthetic modern ordinary and phishing emails written by OpenAI models)",
+      "license": "Apache-2.0",
+      "citation": "https://huggingface.co/datasets/Dizzzy0x00/LLMGen-Phishing-Email-Dataset",
+      "files": [
+        {
+          "url": "https://huggingface.co/datasets/Dizzzy0x00/LLMGen-Phishing-Email-Dataset/resolve/main/GPT_Phishing_Email_dataset.csv",
+          "name": "GPT_Phishing_Email_dataset.csv",
+          "sha256": "e3a335c8acacec09afaa4b9a14c7010195063310e4dcfbae38c1fa50b8d48dc3"
+        }
+      ]
     }
   ]
 }

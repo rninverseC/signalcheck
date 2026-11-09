@@ -35,7 +35,7 @@ const report = {
 };
 const warnings = {
   text: 'Public SMS ham, spam, and smishing labels (UCI 2011, Mendeley). Not modern-scam ground truth. No further tuning on these test results.',
-  email: 'Public email ham, spam, and phishing labels (SpamAssassin, Enron-Spam, Nazario). Sources differ in era and collection method. No further tuning on these test results.',
+  email: 'Public email ham, spam, and phishing labels (SpamAssassin, Enron-Spam, Nazario, synthetic LLMGen). Sources differ in era and collection method. No further tuning on these test results.',
 };
 for (const kind of ['text', 'email']) {
   try {

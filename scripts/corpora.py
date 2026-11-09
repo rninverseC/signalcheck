@@ -104,6 +104,14 @@ def clean_email(subject: str, body: str) -> str:
     return re.sub(r"\n\s*\n+", "\n\n", text).strip()
 
 
+def llmgen_text(content: str) -> str:
+    """Drop the generator's markdown and field labels; keep subject and body."""
+    text = re.sub(r"\*\*|__", "", content)
+    text = re.sub(r"(?i)\b(?:from|to|sender)\s*:[^\n]{0,150}?(?:<[^>\n]*>|[\w.+-]+@[\w.-]+\w|(?=email body\s*:)|$)", " ", text, count=2, flags=re.M)
+    text = re.sub(r"(?i)\b(?:subject|email body|body)\s*:\s*", "", text)
+    return clean_email("", text)
+
+
 def load_email_rows():
     rows = []
     csv.field_size_limit(1 << 27)
@@ -132,4 +140,9 @@ def load_email_rows():
             if text:
                 year = default if path.name.startswith("phishing-") else _year(message, default)
                 rows.append({"message": text, "label": 1, "category": "phishing", "source": "nazario-phishing", "year": year, "file": path.name})
+    with open(RAW / "llmgen-phishing/GPT_Phishing_Email_dataset.csv", encoding="utf-8-sig", newline="") as handle:
+        for record in csv.DictReader(handle):
+            if record["label"] in ("0", "1") and (text := llmgen_text(record["content"])):
+                category = "phishing" if record["label"] == "1" else "ham"
+                rows.append({"message": text, "label": int(record["label"]), "category": category, "source": "llmgen-phishing", "year": 2024})
     return rows

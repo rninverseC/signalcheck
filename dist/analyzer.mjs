@@ -106,6 +106,13 @@ export function analyzeMessage({ message, sender = '', type = 'email', language 
     }
   }
 
+  // An unencrypted link only adds points when the message asks for action or
+  // details; on its own it is common in older ordinary mail.
+  const httpLink = findings.find(finding => finding.id === 'http-link');
+  if (httpLink && !findings.some(finding => finding.group === 'sensitive' || finding.group === 'money') && !(actionWords.test(normalized.text) || (english && actionWords.test(english)))) {
+    Object.assign(httpLink, { baseWeight: 0, weight: 0, explanation: `${httpLink.explanation} The message does not ask you to act on a link or share sign-in, personal, or payment details, so this adds no points.` });
+  }
+
   // Both models were trained and evaluated on English messages. Translation
   // output has a different distribution, so skip them for non-English input.
   const model = language === 'en' && !limited ? classifyMessage(text, type === 'text' ? 'text' : 'email') : null;

@@ -91,39 +91,39 @@
   },
   "public_email_test": {
     "warning": "Public email ham, spam, and phishing labels (SpamAssassin, Enron-Spam, Nazario). Sources differ in era and collection method. No further tuning on these test results.",
-    "inference_parity_max_error": 1.4092105260488097e-10,
+    "inference_parity_max_error": 1.4645795687329155e-10,
     "baseline_v1": {
-      "true_positive": 367,
-      "false_positive": 84,
-      "true_negative": 2736,
-      "false_negative": 2689,
-      "messages": 5876,
-      "precision": 0.81375,
-      "recall": 0.12009,
-      "false_positive_rate": 0.02979,
-      "accuracy": 0.52808
+      "true_positive": 615,
+      "false_positive": 88,
+      "true_negative": 2913,
+      "false_negative": 2822,
+      "messages": 6438,
+      "precision": 0.87482,
+      "recall": 0.17894,
+      "false_positive_rate": 0.02932,
+      "accuracy": 0.548
     },
     "current": {
-      "true_positive": 2704,
-      "false_positive": 76,
-      "true_negative": 2744,
+      "true_positive": 3085,
+      "false_positive": 84,
+      "true_negative": 2917,
       "false_negative": 352,
-      "messages": 5876,
-      "precision": 0.97266,
-      "recall": 0.88482,
-      "false_positive_rate": 0.02695,
-      "accuracy": 0.92716
+      "messages": 6438,
+      "precision": 0.97349,
+      "recall": 0.89759,
+      "false_positive_rate": 0.02799,
+      "accuracy": 0.93228
     },
     "runtime_model_only": {
-      "true_positive": 2699,
-      "false_positive": 21,
-      "true_negative": 2799,
-      "false_negative": 357,
-      "messages": 5876,
-      "precision": 0.99228,
-      "recall": 0.88318,
-      "false_positive_rate": 0.00745,
-      "accuracy": 0.93567
+      "true_positive": 3083,
+      "false_positive": 29,
+      "true_negative": 2972,
+      "false_negative": 354,
+      "messages": 6438,
+      "precision": 0.99068,
+      "recall": 0.897,
+      "false_positive_rate": 0.00966,
+      "accuracy": 0.94051
     }
   }
 }

@@ -33,7 +33,7 @@ The trained English text and email models are **skipped for all non-English and 
 ## Learned text and email models (version 3.1)
 
 - **Text model:** trained on the UCI SMS Spam Collection plus the Mendeley SMS Phishing dataset (ham, spam, and smishing). Used for English texts of up to 180 tokens.
-- **Email model:** trained on the Apache SpamAssassin corpus, Enron-Spam, and the Nazario phishing corpus. Used for English emails of at least 20 tokens; only the first 400 tokens are scored. Shorter emails rely on the rules.
+- **Email model:** trained on the Apache SpamAssassin corpus, Enron-Spam, the Nazario phishing corpus, and a synthetic set of modern ordinary and phishing emails written by language models (LLMGen). Used for English emails of at least 20 tokens; only the first 400 tokens are scored. Shorter emails rely on the rules.
 - Both are TF-IDF + logistic regression, exported as JavaScript and run in the browser. A match adds one explained signal ("Wording resembles spam or phishing emails" / "spam or smishing texts") with supporting word associations.
 - The training pipeline downloads every corpus from [research/data-sources.json](research/data-sources.json) with SHA-256 checks, removes duplicates, groups templates before splitting, picks thresholds on validation only, and saves the prepared splits so a future optional server-side model can train and be compared on exactly the same data.
 
@@ -56,13 +56,15 @@ Held-out public test splits, never used for training or threshold selection ("fl
 | Text: 147 spam/smishing, 774 ordinary | Frozen v1 rules | 7 (4.8%) | 0 (0%) |
 | | Text model | 137 (93.2%) | 4 (0.5%) |
 | | Full checker | 136 (92.5%) | 4 (0.5%) |
-| Email: 3,056 spam/phishing, 2,820 ordinary | Frozen v1 rules | 367 (12.0%) | 84 (3.0%) |
-| | Email model | 2,699 (88.3%) | 21 (0.7%) |
-| | Full checker | 2,704 (88.5%) | 76 (2.7%) |
+| Email: 3,437 spam/phishing, 3,001 ordinary | Frozen v1 rules | 615 (17.9%) | 88 (2.9%) |
+| | Email model | 3,083 (89.7%) | 29 (1.0%) |
+| | Full checker | 3,085 (89.8%) | 84 (2.8%) |
 
-The email model also flagged 360 of 426 (84.5%) later-year 2025 phishing emails held out from all splits.
+The email model also flagged 356 of 426 (83.6%) later-year 2025 phishing emails held out from all splits.
 
-These are **public-corpus labels, mostly from older data**, not a measured rate of modern scam detection. Spam includes advertising. Ordinary and phishing email come from different collections, so the model can partly learn source style; genuine account-security notices share vocabulary with phishing. The full checker's extra email false positives come mainly from link rules flagging plain `http://` links in 2002-era mailing-list mail. The 46 authored development scenarios and 14 authored emails were used during development; they are regression checks, not independent accuracy evidence. See [MODEL_CARD.md](MODEL_CARD.md), [detector evaluation](research/detector-evaluation.json), and [training evaluation](research/model-evaluation.json).
+Before the synthetic modern emails were added, the email model wrongly flagged 496 of 1,269 (39%) of that set's ordinary emails, such as account-feature announcements and shipping updates, because its older ordinary mail rarely mentioned accounts or security. After adding the set, it flagged 2 of 181 (1.1%) held-out ordinary emails from it. That set is machine-written and formulaic, so its own scores (379 of 381 phishing flagged) overstate real-world performance.
+
+These are **public-corpus labels, mostly from older data**, not a measured rate of modern scam detection. Spam includes advertising. Ordinary and phishing email come from different collections, so the model can partly learn source style; genuine account-security notices share vocabulary with phishing. The full checker's extra email false positives come mainly from rules on 2002-era SpamAssassin mailing-list mail (46 of 654 flagged). A plain `http://` link now adds points only when the message also asks you to act or share details. The 46 authored development scenarios and 14 authored emails were used during development; they are regression checks, not independent accuracy evidence. See [MODEL_CARD.md](MODEL_CARD.md), [detector evaluation](research/detector-evaluation.json), and [training evaluation](research/model-evaluation.json).
 
 ## Reproduce the research
 
@@ -101,7 +103,7 @@ The checker does not authenticate senders, examine full email headers, scan file
 
 ## Sources and attribution
 
-Model data (details and licenses in [research/data-sources.json](research/data-sources.json) and [MODEL_CARD.md](MODEL_CARD.md)): Almeida & Hidalgo (2011), [SMS Spam Collection](https://doi.org/10.24432/C5CC84), CC BY 4.0; Mishra & Soni, [SMS Phishing Dataset](https://doi.org/10.17632/f45bkkt8pr.1), CC BY 4.0; [Apache SpamAssassin public corpus](https://spamassassin.apache.org/old/publiccorpus/); Metsis, Androutsopoulos & Paliouras, [Enron-Spam](https://github.com/MWiechmann/enron_spam_data); J. Nazario, [phishing corpus](https://monkey.org/~jose/phishing/), CC BY 4.0. Model weights are derived from these datasets after normalization, duplicate removal, grouped splitting, TF-IDF feature extraction, and logistic-regression training. Raw corpus messages are not published with the Site. No endorsement is implied.
+Model data (details and licenses in [research/data-sources.json](research/data-sources.json) and [MODEL_CARD.md](MODEL_CARD.md)): Almeida & Hidalgo (2011), [SMS Spam Collection](https://doi.org/10.24432/C5CC84), CC BY 4.0; Mishra & Soni, [SMS Phishing Dataset](https://doi.org/10.17632/f45bkkt8pr.1), CC BY 4.0; [Apache SpamAssassin public corpus](https://spamassassin.apache.org/old/publiccorpus/); Metsis, Androutsopoulos & Paliouras, [Enron-Spam](https://github.com/MWiechmann/enron_spam_data); J. Nazario, [phishing corpus](https://monkey.org/~jose/phishing/), CC BY 4.0; [LLM-Generated Phishing Email Dataset](https://huggingface.co/datasets/Dizzzy0x00/LLMGen-Phishing-Email-Dataset) (English part), Apache-2.0. Model weights are derived from these datasets after normalization, duplicate removal, grouped splitting, TF-IDF feature extraction, and logistic-regression training. Raw corpus messages are not published with the Site. No endorsement is implied.
 
 Scam rules draw on FTC guidance about [phishing](https://consumer.ftc.gov/articles/how-recognize-avoid-phishing-scams), [task scams](https://consumer.ftc.gov/consumer-alerts/2024/11/task-scams-create-illusion-making-money), [safe-account impersonation](https://consumer.ftc.gov/consumer-alerts/2024/06/got-call-about-fraud-activity-your-bank-account-it-could-be-scammer), [toll texts](https://consumer.ftc.gov/consumer-alerts/2025/01/got-text-about-unpaid-tolls-its-probably-scam), and [fake checks](https://consumer.ftc.gov/consumer-alerts/2020/02/ftc-bottom-line-fake-checks-scams). The implementation and weights are original design choices, not FTC-endorsed detection rules.
 

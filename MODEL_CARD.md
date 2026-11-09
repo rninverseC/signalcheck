@@ -38,8 +38,11 @@ Sources, licenses, download URLs, and SHA-256 hashes are recorded in [research/d
 | Email | [Apache SpamAssassin public corpus](https://spamassassin.apache.org/old/publiccorpus/) (2002–2005) | 6,046 | ham / spam |
 | Email | [Enron-Spam](https://github.com/MWiechmann/enron_spam_data) (Metsis, Androutsopoulos & Paliouras, 2006) | 33,665 | ham / spam |
 | Email | [Nazario phishing corpus](https://monkey.org/~jose/phishing/), CC BY 4.0 | 8,432 | phishing |
+| Email | [LLM-Generated Phishing Email Dataset](https://huggingface.co/datasets/Dizzzy0x00/LLMGen-Phishing-Email-Dataset), English part (synthetic, written by OpenAI models), Apache-2.0 | 3,746 | ham / phishing |
 
 "Suspicious" (label 1) merges spam, smishing, and phishing. Spam includes unwanted advertising, so a match means "resembles spam or phishing," not "is a scam." SpamAssassin's terms leave copyright with original senders; no explicit license was found for the Enron-Spam packaging. Only learned weights derived from these corpora are published. No endorsement by the data creators is implied.
+
+The LLMGen set was added because the older ordinary mail rarely mentions accounts, security, or orders. Before it was added, the email model wrongly flagged 496 of its 1,269 ordinary emails (39%); the full checker flagged 524 (41%). It is machine-written and formulaic, and some emails it labels phishing (for example a billing-statement notice) look like genuine notices. Its generator's field labels and sender lines are removed before training.
 
 ### Split and training procedure
 
@@ -66,22 +69,22 @@ Library versions are recorded in [research/model-evaluation.json](research/model
 
 By source (model): Mendeley smishing 22/23, Mendeley spam 26/28, UCI spam 89/96; ordinary false positives 1/76 Mendeley and 3/698 UCI.
 
-**Email test split: 5,876 messages (3,056 spam/phishing, 2,820 ordinary)**
+**Email test split: 6,438 messages (3,437 spam/phishing, 3,001 ordinary)**
 
 | Component | Suspicious flagged | Ordinary flagged | Precision | Recall |
 | --- | ---: | ---: | ---: | ---: |
-| Frozen v1 rules | 367 / 3,056 | 84 / 2,820 | 81.4% | 12.0% |
-| Email model | 2,699 / 3,056 | 21 / 2,820 | 99.2% | 88.3% |
-| Full checker | 2,704 / 3,056 | 76 / 2,820 | 97.3% | 88.5% |
+| Frozen v1 rules | 615 / 3,437 | 88 / 3,001 | 87.5% | 17.9% |
+| Email model | 3,083 / 3,437 | 29 / 3,001 | 99.1% | 89.7% |
+| Full checker | 3,085 / 3,437 | 84 / 3,001 | 97.3% | 89.8% |
 
-By source (model): Nazario phishing 751/843 (89.1%), Enron spam 1,772/2,021 (87.7%), SpamAssassin spam 176/192 (91.7%); ordinary false positives 11/2,166 Enron (0.5%) and 10/654 SpamAssassin (1.5%). About 5.5% of test emails are below the 20-token minimum and are not scored by the model.
+By source (model): Nazario phishing 752/843 (89.2%), Enron spam 1,780/2,021 (88.1%), SpamAssassin spam 172/192 (89.6%), LLMGen phishing 379/381 (99.5%); ordinary false positives 15/2,166 Enron (0.7%), 12/654 SpamAssassin (1.8%), and 2/181 LLMGen (1.1%). LLMGen's near-perfect phishing score reflects its formulaic writing, not real-world performance. About 4.9% of test emails are below the 20-token minimum and are not scored by the model.
 
-The full checker's email false positives (2.7%) come mostly from rules, not the model: SpamAssassin's 2002 mailing-list mail often contains plain `http://` links, which the link rules flag. Later-year check: the email model flagged 360 of 426 (84.5%) of Nazario's held-out 2025 phishing. That figure is recall only; there is no matching 2025 ordinary mail.
+The full checker's email false positives (2.8%) come mostly from rules, not the model: 46 of 654 SpamAssassin 2002 mailing-list emails are flagged, often for plain `http://` links alongside sign-in or deadline wording. A plain `http://` link adds points only when the message also asks you to act or share details. Later-year check: the email model flagged 356 of 426 (83.6%) of Nazario's held-out 2025 phishing. That figure is recall only; there is no matching 2025 ordinary mail.
 
 ### What these numbers do not show
 
-- **They are not modern-scam accuracy.** Much of the data is old: SpamAssassin 2002–2005, Enron-Spam 2006, and UCI SMS 2011. Nazario phishing runs to 2025, and the Mendeley SMS set is more recent. Current scams, writing styles, and brands differ.
-- **Source differences remain.** Ordinary email comes from two corporate/mailing-list sources, while phishing comes from one collector's mailbox. Even with the filters above, the model can partly learn source style. The strongest ordinary features include "wrote," "attached," and "thanks," which are common in replies and workplace mail; personal and transactional email is underrepresented.
+- **They are not modern-scam accuracy.** Much of the data is old: SpamAssassin 2002–2005, Enron-Spam 2006, and UCI SMS 2011. Nazario phishing runs to 2025, the Mendeley SMS set is more recent, and the only modern ordinary email is synthetic. Current scams, writing styles, and brands differ.
+- **Source differences remain.** Real ordinary email comes from two corporate/mailing-list sources, while real phishing comes from one collector's mailbox. Even with the filters above, the model can partly learn source style. The strongest ordinary features include "wrote," "attached," and "thanks," which are common in replies and workplace mail; personal and transactional email is underrepresented.
 - **Account-security wording overlaps.** Genuine password-change, billing, or shipping notices share vocabulary with phishing. Among the authored emails, a genuine password-change notice scores closest to the threshold without crossing it.
 - **Bag-of-words limits.** The models do not understand negation or intent. Safety advice that discusses scams can resemble scams.
 - **Grouping is approximate.** Paraphrased campaigns can still cross split boundaries.

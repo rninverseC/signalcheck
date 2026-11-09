@@ -175,9 +175,10 @@
   "email": {
     "model": "email-tfidf-logistic-1",
     "exported_file": "dist/email-model.mjs",
-    "model_bytes": 236149,
+    "model_bytes": 237695,
     "sources": [
       "enron-spam",
+      "llmgen-phishing",
       "nazario-phishing",
       "spamassassin"
     ],
@@ -186,9 +187,11 @@
       "spamassassin/spam": 1896,
       "enron-spam/ham": 16545,
       "enron-spam/spam": 17120,
-      "spamassassin/ham": 4150
+      "spamassassin/ham": 4150,
+      "llmgen-phishing/phishing": 2477,
+      "llmgen-phishing/ham": 1269
     },
-    "unique_groups_kept": 39518,
+    "unique_groups_kept": 43264,
     "conflicting_groups_removed": 1,
     "split_seed": "signalcheck-sms-group-split-v1",
     "split": "70/15/15 stable SHA256 groups, not exact proportions",
@@ -220,7 +223,7 @@
     ],
     "minimum_corpora_per_feature": 2,
     "regularization_C": 16.0,
-    "threshold": 1.5221744011772544,
+    "threshold": 1.3417602475013255,
     "threshold_rule": "highest validation recall with false-positive rate <= 0.01",
     "test_used_for_training_or_threshold_selection": false,
     "training_libraries": {
@@ -229,24 +232,24 @@
     },
     "split_counts": {
       "train": {
-        "messages": 27376,
+        "messages": 30012,
         "labels": {
-          "suspicious": 14557,
-          "ordinary": 12819
+          "suspicious": 16277,
+          "ordinary": 13735
         }
       },
       "validation": {
-        "messages": 5840,
+        "messages": 6388,
         "labels": {
-          "suspicious": 3076,
-          "ordinary": 2764
+          "suspicious": 3452,
+          "ordinary": 2936
         }
       },
       "test": {
-        "messages": 5876,
+        "messages": 6438,
         "labels": {
-          "suspicious": 3056,
-          "ordinary": 2820
+          "suspicious": 3437,
+          "ordinary": 3001
         }
       }
     },
@@ -257,122 +260,132 @@
         "minimumKnownTokens": 5
       },
       "note": "Messages outside these limits are not scored by the model and count as unflagged in the metrics below.",
-      "train_eligible_share": 0.94568,
-      "validation_eligible_share": 0.94401,
-      "test_eligible_share": 0.94469
+      "train_eligible_share": 0.95039,
+      "validation_eligible_share": 0.94881,
+      "test_eligible_share": 0.94936
     },
     "validation": {
-      "messages": 5840,
-      "ordinary": 2764,
-      "suspicious": 3076,
-      "true_positive": 2714,
-      "false_positive": 27,
-      "true_negative": 2737,
-      "false_negative": 362,
-      "precision": 0.99015,
-      "recall": 0.88231,
-      "false_positive_rate": 0.00977,
-      "accuracy": 0.93339
+      "messages": 6388,
+      "ordinary": 2936,
+      "suspicious": 3452,
+      "true_positive": 3100,
+      "false_positive": 29,
+      "true_negative": 2907,
+      "false_negative": 352,
+      "precision": 0.99073,
+      "recall": 0.89803,
+      "false_positive_rate": 0.00988,
+      "accuracy": 0.94036
     },
     "test_model_only": {
-      "messages": 5876,
-      "ordinary": 2820,
-      "suspicious": 3056,
-      "true_positive": 2699,
-      "false_positive": 21,
-      "true_negative": 2799,
-      "false_negative": 357,
-      "precision": 0.99228,
-      "recall": 0.88318,
-      "false_positive_rate": 0.00745,
-      "accuracy": 0.93567
+      "messages": 6438,
+      "ordinary": 3001,
+      "suspicious": 3437,
+      "true_positive": 3083,
+      "false_positive": 29,
+      "true_negative": 2972,
+      "false_negative": 354,
+      "precision": 0.99068,
+      "recall": 0.897,
+      "false_positive_rate": 0.00966,
+      "accuracy": 0.94051
     },
     "test_by_source": {
       "enron-spam/ham": {
         "messages": 2166,
-        "flagged": 11,
-        "false_positive_rate": 0.00508
+        "flagged": 15,
+        "false_positive_rate": 0.00693
       },
       "enron-spam/spam": {
         "messages": 2021,
-        "flagged": 1772,
-        "recall": 0.87679
+        "flagged": 1780,
+        "recall": 0.88075
+      },
+      "llmgen-phishing/ham": {
+        "messages": 181,
+        "flagged": 2,
+        "false_positive_rate": 0.01105
+      },
+      "llmgen-phishing/phishing": {
+        "messages": 381,
+        "flagged": 379,
+        "recall": 0.99475
       },
       "nazario-phishing/phishing": {
         "messages": 843,
-        "flagged": 751,
-        "recall": 0.89087
+        "flagged": 752,
+        "recall": 0.89205
       },
       "spamassassin/ham": {
         "messages": 654,
-        "flagged": 10,
-        "false_positive_rate": 0.01529
+        "flagged": 12,
+        "false_positive_rate": 0.01835
       },
       "spamassassin/spam": {
         "messages": 192,
-        "flagged": 176,
-        "recall": 0.91667
+        "flagged": 172,
+        "recall": 0.89583
       }
     },
     "strongest_suspicious_features": [
       "your",
       "account",
       "hello",
-      "remove",
-      "kindly",
-      "here",
       "alert",
-      "over __number__",
-      "huge",
+      "remove",
+      "below",
+      "urgent",
       "ebay",
-      "you",
+      "over __number__",
+      "here",
+      "important",
+      "huge",
+      "kindly",
       "bank",
-      "your account",
-      "watch",
-      "girls",
-      "low",
       "online",
-      "vi",
-      "viagra",
-      "notification",
-      "payment",
       "otc",
-      "no",
+      "low",
+      "viagra",
+      "you",
+      "vi",
+      "watch",
+      "brand",
+      "girls",
       "gold",
-      "real"
+      "our"
     ],
     "strongest_ordinary_features": [
       "wrote",
       "url __url__",
-      "employees",
-      "congratulations",
-      "url",
-      "attached",
       "the",
+      "attached",
       "to",
-      "thanks",
-      "gas",
-      "doc",
-      "energy",
-      "chris",
-      "yesterday",
-      "here is",
+      "employees",
+      "url",
       "john",
+      "energy",
+      "gas",
+      "congratulations",
+      "doc",
+      "yesterday",
       "forwarded",
-      "tap",
-      "date __number__",
-      "that",
-      "supplied",
+      "here is",
+      "chris",
+      "feature",
       "writes",
-      "ken",
+      "tap",
       "subscription",
-      "comments"
+      "that",
+      "ken",
+      "power",
+      "shirley",
+      "october __number__"
     ],
     "future_phishing_holdout": {
       "description": "Nazario phishing-2025 templates not seen in earlier years; excluded from training, validation, and test. Recall only: there is no matching 2025 ordinary mail.",
       "messages": 426,
-      "flagged": 360,
-      "recall": 0.84507
+      "flagged": 356,
+      "recall": 0.83568
     }
   }
 }

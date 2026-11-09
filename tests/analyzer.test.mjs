@@ -125,3 +125,11 @@ test('model explanations exclude function-word-only excerpts', () => {
   assert.ok(model);
   for (const evidence of model.evidence) assert.ok(!/^(?:your|to|this|it|the|and)$/i.test(evidence.text));
 });
+
+test('an unencrypted link adds points only alongside a request to act or share details', () => {
+  const plain = analyzeMessage({ message: 'Notes from the meeting are posted at http://wiki.example.org/notes for anyone curious.', type: 'email' });
+  const plainLink = plain.findings.find(finding => finding.id === 'http-link');
+  assert.equal(plainLink.weight, 0);
+  const asks = analyzeMessage({ message: 'Please verify your account at http://wiki.example.org/notes today.', type: 'email' });
+  assert.equal(asks.findings.find(finding => finding.id === 'http-link').weight, 8);
+});
