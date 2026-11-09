@@ -1,9 +1,9 @@
-import { RULES } from './rules.mjs?v=3.1.0';
-import { normalizeText, originalEvidence, isNegated } from './text-utils.mjs?v=3.1.0';
-import { BRANDS, SHORTENERS, extractLinks, isWithin, claimedBrands, lookalikeBrands, displayedLinkMismatches } from './link-checks.mjs?v=3.1.0';
-import { classifyMessage } from './message-classifier.mjs?v=3.1.0';
+import { RULES } from './rules.mjs?v=3.2.0';
+import { normalizeText, originalEvidence, isNegated } from './text-utils.mjs?v=3.2.0';
+import { BRANDS, SHORTENERS, extractLinks, isWithin, claimedBrands, lookalikeBrands, displayedLinkMismatches } from './link-checks.mjs?v=3.2.0';
+import { classifyMessage } from './message-classifier.mjs?v=3.2.0';
 
-import { LANGUAGES, LANGUAGE_RULES, languageName, isLanguageNegated, sourceScriptMismatch } from './languages.mjs?v=3.1.0';
+import { LANGUAGES, LANGUAGE_RULES, languageName, isLanguageNegated, sourceScriptMismatch } from './languages.mjs?v=3.2.0';
 
 export { RULES, extractLinks };
 export const VERSION = '3.1.0';

@@ -1,4 +1,4 @@
-import { normalizeText, originalEvidence } from './text-utils.mjs?v=3.1.0';
+import { normalizeText, originalEvidence } from './text-utils.mjs?v=3.2.0';
 
 export const BRANDS = [
   { name: 'PayPal', token: 'paypal', pattern: /\bpaypal\b/i, domains: ['paypal.com', 'paypal.me'] },

@@ -1,8 +1,9 @@
-import { analyzeMessage, highlightRanges, MAX_LENGTH } from './analyzer.mjs?v=3.1.0';
-import { getFindingExplanation, getScoreExplanation } from './explanations.mjs?v=3.1.0';
-import { languageName } from './languages.mjs?v=3.1.0';
-import { hasTranslator, translateToEnglish } from './translator.mjs?v=3.1.0';
-import { SAMPLES } from './samples.mjs?v=3.1.0';
+import { analyzeMessage, highlightRanges, MAX_LENGTH } from './analyzer.mjs?v=3.2.0';
+import { getFindingExplanation, getScoreExplanation } from './explanations.mjs?v=3.2.0';
+import { languageName } from './languages.mjs?v=3.2.0';
+import { hasTranslator, translateToEnglish } from './translator.mjs?v=3.2.0';
+import { SAMPLES } from './samples.mjs?v=3.2.0';
+import { checkWithServer, serverModelUrl, SERVER_MINIMUM_WORDS } from './server-model.mjs?v=3.2.0';
 
 const isModelFinding = finding => /^(?:text|email)-pattern$/.test(finding.id);
 
@@ -18,6 +19,17 @@ const language = $('#message-language');
 const translation = $('#english-translation');
 let translationOrigin = 'manual';
 let translationController = null;
+let serverController = null;
+const serverUrl = serverModelUrl();
+const useServer = $('#use-server');
+if (serverUrl) {
+  $('#server-host').textContent = new URL(serverUrl).host;
+  const note = $('.privacy-note'), local = note.lastChild.textContent;
+  const updateNote = () => { note.lastChild.textContent = useServer.checked && currentType() === 'email' ? ` The browser check runs on your device; the server check sends this email to ${new URL(serverUrl).host}.` : local; };
+  useServer.addEventListener('change', updateNote);
+  const showOption = () => { $('#server-option').hidden = currentType() !== 'email'; updateNote(); };
+  form.querySelectorAll('[name="message-type"]').forEach(radio => radio.addEventListener('change', showOption)); showOption();
+}
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -207,12 +219,36 @@ form.addEventListener('submit', event => {
     if (translationController) throw new Error('Wait for the translation to finish, or edit the original message to cancel it.');
     latestResult = analyzeMessage({ message: message.value, sender: sender.value, type: currentType(), language: language.value, translation: translation.value, translationOrigin });
     render(latestResult);
+    if (serverUrl && useServer.checked && latestResult.type === 'email') runServerCheck(latestResult);
   } catch (error) {
     $('#message-error').textContent = error.message; $('#message-error').hidden = false; message.setAttribute('aria-invalid', 'true'); message.focus();
   }
 });
+async function runServerCheck(result) {
+  serverController?.abort();
+  const panel = el('section', 'server-model'); panel.setAttribute('aria-live', 'polite');
+  panel.append(el('h3', '', 'Deeper server check'));
+  content.querySelector('.next-steps')?.before(panel);
+  if (result.language !== 'en' || result.coverage !== 'direct') { panel.append(el('p', '', 'Skipped: the server model was trained on English emails only. Nothing was sent.')); return; }
+  if ((result.model?.tokenCount ?? 0) < SERVER_MINIMUM_WORDS) { panel.append(el('p', '', `Skipped: the server model needs at least ${SERVER_MINIMUM_WORDS} words, so the rules above handle short emails. Nothing was sent.`)); return; }
+  const status = el('p', '', 'Checking with the server model…'); panel.append(status);
+  const controller = serverController = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30000);
+  try {
+    const server = await checkWithServer({ message: result.message }, { url: serverUrl, signal: controller.signal });
+    if (controller !== serverController) return;
+    if (!server.applicable) { status.textContent = `Skipped by the server: it needs at least ${SERVER_MINIMUM_WORDS} words.`; return; }
+    status.textContent = server.matched ? 'The server model found this wording similar to spam or phishing in its training data.' : 'The server model did not find a strong spam or phishing pattern.';
+    panel.append(el('p', '', 'It reads word order and context and scored higher than the browser model on public test emails, but it learned from the same mostly older data and can wrongly flag genuine modern notices such as receipts. It does not change the signal points above.'),
+      el('p', 'server-meta', `${server.version} · ${server.kind} · margin ${server.margin.toFixed(2)} vs threshold ${server.threshold.toFixed(2)}${server.truncated ? ' · long message: only the beginning was read' : ''}`));
+    latestResult.server = server;
+  } catch (error) {
+    if (controller !== serverController) return;
+    status.textContent = error.name === 'AbortError' ? 'The server model did not respond in time. The browser result above is unaffected.' : `${error.message} The browser result above is unaffected.`;
+  } finally { clearTimeout(timer); if (controller === serverController) serverController = null; }
+}
 async function copyReport(result, button) {
-  const report = ['SignalCheck — message analysis', `Detector version: ${result.version}`, `Message type: ${result.type}`, `Message language: ${languageName(result.language)}`, `Coverage: ${result.coverage}. ${result.languageNotice}`, `Translation: ${result.translation ? result.translationOrigin + '; English rules used; English text and email models skipped' : 'not used'}`, `Concern: ${result.label}`, `Signal points: ${result.score}/100. This is not a percentage chance of a scam.`, 'Related signals share a limit; the displayed total is capped at 100.', result.model ? `Local ${result.model.kind} model (${result.model.version}): ${result.model.applicable ? result.model.matched ? 'matched' : 'screened, no match' : 'outside length or vocabulary limits'}` : 'Learned models not used for this message.', '', ...result.findings.map(f => {
+  const report = ['SignalCheck — message analysis', `Detector version: ${result.version}`, `Message type: ${result.type}`, `Message language: ${languageName(result.language)}`, `Coverage: ${result.coverage}. ${result.languageNotice}`, `Translation: ${result.translation ? result.translationOrigin + '; English rules used; English text and email models skipped' : 'not used'}`, `Concern: ${result.label}`, `Signal points: ${result.score}/100. This is not a percentage chance of a scam.`, 'Related signals share a limit; the displayed total is capped at 100.', result.model ? `Local ${result.model.kind} model (${result.model.version}): ${result.model.applicable ? result.model.matched ? 'matched' : 'screened, no match' : 'outside length or vocabulary limits'}` : 'Learned models not used for this message.', result.server?.applicable ? `Server email model (${result.server.version}, opt-in): ${result.server.matched ? 'matched' : 'no match'}; margin ${result.server.margin.toFixed(2)} vs threshold ${result.server.threshold.toFixed(2)}. Does not change the points.` : 'Server model not used.', '', ...result.findings.map(f => {
     const copy = getFindingExplanation(f, result);
     return `${f.title}\nWhat we found: ${copy.found}\n${f.evidence.map(e => `${e.source === 'translation' ? 'English translation evidence' : isModelFinding(f) ? 'Supporting word association' : 'Original matched text'}: ${e.text}`).join('\n')}\nWhy it matters: ${copy.why}\nWhat you can do: ${copy.next}\nKeep in mind: ${copy.limit}\nTechnical detail: ${copy.counted} ${copy.technical}`;
   }), '', 'Next steps:', ...result.actions.map((action, i) => `${i + 1}. ${action}`), '', 'Limitations: English, Spanish, and Chinese request rules; English-only text and email models trained on public spam, smishing, and phishing corpora (mostly older data). Multilingual and translated messages have no independent accuracy benchmark. Translation can alter meaning. Spam labels do not establish phishing detection accuracy. No sender authentication, attachment scan, or live link reputation check. A low score does not mean safe. False positives and missed scams are possible.'].join('\n');
@@ -226,4 +262,5 @@ async function copyReport(result, button) {
   }
 }
 $('#close-dialog').addEventListener('click', () => $('#copy-dialog').close());
-// Message content is never transmitted, stored, logged, or interpolated as HTML.
+// Message content is never stored, logged, or interpolated as HTML, and is only
+// transmitted when the user opts in to a configured server check.

@@ -1,0 +1,237 @@
+{
+ "warning": "Same public-corpus splits as the browser models; see MODEL_CARD.md and server/README.md. Not a measure of modern scam detection.",
+ "served": [
+  "email"
+ ],
+ "email": {
+  "kind": "email",
+  "base_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "base_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+  "max_seq_length": 256,
+  "batch_size": 16,
+  "learning_rate": 5e-05,
+  "chosen_epoch": 2,
+  "threshold": 0.686877965927124,
+  "epochs": [
+   {
+    "epoch": 1,
+    "validation_recall": 0.9774,
+    "validation_precision": 0.99177,
+    "threshold": 3.6945269107818604,
+    "minutes": 26.8
+   },
+   {
+    "epoch": 2,
+    "validation_recall": 0.98667,
+    "validation_precision": 0.99156,
+    "threshold": 1.5820033550262451,
+    "minutes": 25.9
+   }
+  ],
+  "eligibility": {
+   "minimum_words": 20,
+   "train_eligible_share": 0.95139,
+   "validation_eligible_share": 0.95038,
+   "test_eligible_share": 0.95076,
+   "future_eligible_share": 0.95775
+  },
+  "validation": {
+   "messages": 6388,
+   "ordinary": 2936,
+   "suspicious": 3452,
+   "true_positive": 3216,
+   "false_positive": 29,
+   "true_negative": 2907,
+   "false_negative": 236,
+   "precision": 0.99106,
+   "recall": 0.93163,
+   "false_positive_rate": 0.00988,
+   "accuracy": 0.95852
+  },
+  "test": {
+   "messages": 6438,
+   "ordinary": 3001,
+   "suspicious": 3437,
+   "true_positive": 3225,
+   "false_positive": 22,
+   "true_negative": 2979,
+   "false_negative": 212,
+   "precision": 0.99322,
+   "recall": 0.93832,
+   "false_positive_rate": 0.00733,
+   "accuracy": 0.96365
+  },
+  "test_by_source": {
+   "enron-spam/ham": {
+    "messages": 2166,
+    "flagged": 11,
+    "false_positive_rate": 0.00508
+   },
+   "enron-spam/spam": {
+    "messages": 2021,
+    "flagged": 1886,
+    "recall": 0.9332
+   },
+   "llmgen-phishing/ham": {
+    "messages": 181,
+    "flagged": 0,
+    "false_positive_rate": 0.0
+   },
+   "llmgen-phishing/phishing": {
+    "messages": 381,
+    "flagged": 381,
+    "recall": 1.0
+   },
+   "nazario-phishing/phishing": {
+    "messages": 843,
+    "flagged": 778,
+    "recall": 0.92289
+   },
+   "spamassassin/ham": {
+    "messages": 654,
+    "flagged": 11,
+    "false_positive_rate": 0.01682
+   },
+   "spamassassin/spam": {
+    "messages": 192,
+    "flagged": 180,
+    "recall": 0.9375
+   }
+  },
+  "future_phishing_holdout": {
+   "messages": 426,
+   "flagged": 397,
+   "recall": 0.93192
+  }
+ },
+ "text": {
+  "kind": "text",
+  "base_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "base_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+  "max_seq_length": 256,
+  "batch_size": 16,
+  "learning_rate": 5e-05,
+  "chosen_epoch": 2,
+  "threshold": -2.536198139190674,
+  "epochs": [
+   {
+    "epoch": 1,
+    "validation_recall": 0.96124,
+    "validation_precision": 0.95385,
+    "threshold": -5.63279914855957,
+    "minutes": 0.7
+   },
+   {
+    "epoch": 2,
+    "validation_recall": 0.96899,
+    "validation_precision": 0.96899,
+    "threshold": -2.536198139190674,
+    "minutes": 0.8
+   },
+   {
+    "epoch": 3,
+    "validation_recall": 0.96899,
+    "validation_precision": 0.94697,
+    "threshold": -5.657443046569824,
+    "minutes": 1.1
+   },
+   {
+    "epoch": 4,
+    "validation_recall": 0.96899,
+    "validation_precision": 0.96154,
+    "threshold": -2.1504287719726562,
+    "minutes": 1.1
+   }
+  ],
+  "eligibility": {
+   "minimum_words": 0,
+   "train_eligible_share": 1.0,
+   "validation_eligible_share": 1.0,
+   "test_eligible_share": 1.0
+  },
+  "validation": {
+   "messages": 845,
+   "ordinary": 716,
+   "suspicious": 129,
+   "true_positive": 125,
+   "false_positive": 4,
+   "true_negative": 712,
+   "false_negative": 4,
+   "precision": 0.96899,
+   "recall": 0.96899,
+   "false_positive_rate": 0.00559,
+   "accuracy": 0.99053
+  },
+  "test": {
+   "messages": 921,
+   "ordinary": 774,
+   "suspicious": 147,
+   "true_positive": 138,
+   "false_positive": 4,
+   "true_negative": 770,
+   "false_negative": 9,
+   "precision": 0.97183,
+   "recall": 0.93878,
+   "false_positive_rate": 0.00517,
+   "accuracy": 0.98588
+  },
+  "test_by_source": {
+   "mendeley-smishing/ham": {
+    "messages": 76,
+    "flagged": 3,
+    "false_positive_rate": 0.03947
+   },
+   "mendeley-smishing/smishing": {
+    "messages": 23,
+    "flagged": 23,
+    "recall": 1.0
+   },
+   "mendeley-smishing/spam": {
+    "messages": 28,
+    "flagged": 26,
+    "recall": 0.92857
+   },
+   "uci-sms/ham": {
+    "messages": 698,
+    "flagged": 1,
+    "false_positive_rate": 0.00143
+   },
+   "uci-sms/spam": {
+    "messages": 96,
+    "flagged": 89,
+    "recall": 0.92708
+   }
+  }
+ },
+ "not_shipped": {
+  "text": "Fine-tuned text model matched the browser text model (138/147 vs 137/147 suspicious, 4/774 vs 4/774 ordinary), so texts stay in the browser.",
+  "frozen_encoder_logistic": {
+   "text": {
+    "test": {
+     "true_positive": 132,
+     "suspicious": 147,
+     "false_positive": 5,
+     "ordinary": 774,
+     "recall": 0.89796,
+     "false_positive_rate": 0.00646
+    }
+   },
+   "email": {
+    "test": {
+     "true_positive": 2499,
+     "suspicious": 3437,
+     "false_positive": 31,
+     "ordinary": 3001,
+     "recall": 0.72709,
+     "false_positive_rate": 0.01033
+    }
+   }
+  }
+ },
+ "versions": {
+  "torch": "2.5.1+cpu",
+  "transformers": "4.57.6",
+  "scikit_learn": "1.9.0",
+  "numpy": "2.4.3"
+ }
+}

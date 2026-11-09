@@ -89,6 +89,10 @@ The full checker's email false positives (2.8%) come mostly from rules, not the 
 - **Bag-of-words limits.** The models do not understand negation or intent. Safety advice that discusses scams can resemble scams.
 - **Grouping is approximate.** Paraphrased campaigns can still cross split boundaries.
 
+## Optional server email model (v3.2)
+
+An optional, off-by-default email classifier for self-hosting: all-MiniLM-L6-v2 fine-tuned end to end on the same email train split, with epoch and threshold chosen on validation (≤1% false positives) and the same 20-word minimum as the browser model. On the 6,438-email test split it flagged 3,225/3,437 suspicious (93.8%) and 22/3,001 ordinary (0.73%), versus 3,083 and 29 for the browser model; on the 2025 phishing holdout, 397/426 (93.2%) versus 356/426 (83.6%). It shares the training data's age and source-separation limits, wrongly flagged one of eight longer authored ordinary emails (a receipt), and is shown only as a second opinion that does not change the points. A text server model was not shipped: 138/147 and 4/774 on the text test, versus 137/147 and 4/774 for the browser model. Details: [server/README.md](server/README.md) and [research/server-model-evaluation.json](research/server-model-evaluation.json).
+
 ## Authored scenario checks
 
 There are 46 authored development scenarios (in `tests/scenarios.mjs`) and 14 authored modern emails (in `tests/email-scenarios.mjs`: 8 ordinary, 6 phishing/scam). The full checker flags all 6 suspicious emails and none of the 8 ordinary ones. Of the 46 general scenarios, there are 24 suspicious requests and 22 ordinary messages or safety instructions. V1 flags 12 of the suspicious cases and 6 ordinary cases; v2 flags all 24 suspicious cases and none of the ordinary cases at the 15-point threshold.
@@ -99,4 +103,4 @@ These cases were used to develop the rules. Their results demonstrate regression
 
 Both components can produce false positives and false negatives. The message's actual sender, hidden destination lost during copying, attachment contents, account context, and current link reputation are unknown. No allowlisted domain authenticates a sender or proves a page is harmless. Lexical brand similarity can match legitimate names; the brand list is incomplete. Local negation and quoted-example handling can be fooled.
 
-The checker never opens pasted links and sends no message content to a server. Static app and model assets are loaded normally. No API costs are incurred by analysis. Results remain guidance to verify a request using an independent source.
+The checker never opens pasted links and sends no message content to a server unless a deployment configures the optional server email model and the visitor ticks the deeper check for that email. Static app and model assets are loaded normally. No API costs are incurred by analysis. Results remain guidance to verify a request using an independent source.

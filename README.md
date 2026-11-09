@@ -37,6 +37,10 @@ The trained English text and email models are **skipped for all non-English and 
 - Both are TF-IDF + logistic regression, exported as JavaScript and run in the browser. A match adds one explained signal ("Wording resembles spam or phishing emails" / "spam or smishing texts") with supporting word associations.
 - The training pipeline downloads every corpus from [research/data-sources.json](research/data-sources.json) with SHA-256 checks, removes duplicates, groups templates before splitting, picks thresholds on validation only, and saves the prepared splits so a future optional server-side model can train and be compared on exactly the same data.
 
+## Optional server email model (version 3.2)
+
+A fine-tuned transformer (MiniLM) for English emails can run on a server you host, as an opt-in second opinion. It is **off by default**: the published page configures no server and its Content-Security-Policy blocks all requests. When a deployment configures one, visitors see “Also run the deeper server check”; only then is that email sent. On the same held-out public email test it flagged 93.8% of spam/phishing at 0.73% false positives (browser model: 89.7% at 0.97%), and 93.2% of 2025 phishing (browser: 83.6%). It does not change the signal points. A text server model was no better than the browser one, so texts stay in the browser. Training, limits, and deployment: [server/README.md](server/README.md).
+
 ## What's improved in version 2
 
 - Detects safe-account bank impersonation, check-and-refund requests, pay-to-unlock earnings, online task recruiting, gift card code requests, and forwarding a recently mentioned security code.
@@ -79,13 +83,13 @@ npm run evaluate     # end-to-end checker evaluation and JavaScript/Python parit
 
 The downloader verifies every file's SHA-256 against [research/data-sources.json](research/data-sources.json). Training uses only training data to learn the vocabulary and coefficients, and only validation data to choose regularization and the threshold. Normalized templates are grouped before splitting. The test split is not used to choose features, coefficients, or thresholds. JavaScript inference is checked against Python on every held-out message.
 
-Training also writes the prepared splits to `research/data/splits/{text,email}-{train,validation,test}.jsonl` (plus `email-future.jsonl`). A future server-side model should train on these files and report on the same test split so it can be compared directly with the browser models.
+Training also writes the prepared splits to `research/data/splits/{text,email}-{train,validation,test}.jsonl` (plus `email-future.jsonl`). The optional server model ([server/](server/)) trains on these files and reports on the same test split, so it can be compared directly with the browser models.
 
 `npm run evaluate` without the ignored corpora reports that the public tests are unavailable; it still runs the authored scenarios. Reproduction can vary slightly across platforms and library versions; the recorded versions are pinned in `scripts/requirements-research.txt`.
 
 ## Privacy and hosting
 
-Local use does not require an account. When you publish this repository, visitor access is controlled by the hosting service you choose. Message text and sender details stay in browser memory until cleared or the page is closed. The checker makes no cloud API requests, visits no pasted links, uses no analytics, and does not persist messages in cookies, local storage, or a server. Model weights and app files are ordinary static assets loaded when the page opens. Optional translation calls the browser’s built-in API; browser-managed language-pack downloads are separate from message processing.
+Local use does not require an account. When you publish this repository, visitor access is controlled by the hosting service you choose. Message text and sender details stay in browser memory until cleared or the page is closed. The checker makes no cloud API requests (unless a deployment configures the optional server email model and the visitor opts in), visits no pasted links, uses no analytics, and does not persist messages in cookies, local storage, or a server. Model weights and app files are ordinary static assets loaded when the page opens. Optional translation calls the browser’s built-in API; browser-managed language-pack downloads are separate from message processing.
 
 Copy report explicitly copies matched evidence to your clipboard. Static hosting receives ordinary page requests; the message-content privacy claim concerns the checker code.
 

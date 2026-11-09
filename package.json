@@ -1,6 +1,6 @@
 {
   "name": "signalcheck",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "private": true,
   "type": "module",
   "description": "Explainable browser-only scam checks with locally trained text and email classifiers",
@@ -9,6 +9,8 @@
     "start": "python3 -m http.server 4173 --bind 127.0.0.1 --directory dist",
     "evaluate": "node scripts/evaluate-detector.mjs",
     "fetch-data": "python3 scripts/fetch_training_data.py",
-    "train": "python3 scripts/train_models.py"
+    "train": "python3 scripts/train_models.py",
+    "train-server": "cd server && ~/.venvs/signalcheck-server/bin/python train.py",
+    "serve-model": "cd server && ~/.venvs/signalcheck-server/bin/uvicorn app:app --port 8000 --no-access-log"
   }
 }
