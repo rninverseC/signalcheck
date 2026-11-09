@@ -1,8 +1,10 @@
-import { analyzeMessage, highlightRanges, MAX_LENGTH } from './analyzer.mjs?v=3.0.0';
-import { getFindingExplanation, getScoreExplanation } from './explanations.mjs?v=3.0.0';
-import { languageName } from './languages.mjs?v=3.0.0';
-import { hasTranslator, translateToEnglish } from './translator.mjs?v=3.0.0';
-import { SAMPLES } from './samples.mjs?v=3.0.0';
+import { analyzeMessage, highlightRanges, MAX_LENGTH } from './analyzer.mjs?v=3.1.0';
+import { getFindingExplanation, getScoreExplanation } from './explanations.mjs?v=3.1.0';
+import { languageName } from './languages.mjs?v=3.1.0';
+import { hasTranslator, translateToEnglish } from './translator.mjs?v=3.1.0';
+import { SAMPLES } from './samples.mjs?v=3.1.0';
+
+const isModelFinding = finding => /^(?:text|email)-pattern$/.test(finding.id);
 
 const $ = selector => document.querySelector(selector);
 const message = $('#message');
@@ -149,7 +151,7 @@ function render(result) {
     review.append(original, el('p', '', `English translation · ${result.translationOrigin === 'on-device' ? 'generated on this device' : 'provided by you'}`), english, el('p', '', 'Translation can miss or alter meaning. Original links and sender details were checked separately; no translated addresses were used as destinations.'));
     analysis.append(review);
   }
-  const method = result.language !== 'en' ? `${result.translation ? 'Native and English translation request rules' : 'Native request rules'}, plus original-link checks. The English SMS model was skipped.` : result.coverage === 'limited' ? 'Partial wording and link checks. The English SMS model was skipped because the writing system did not match.' : result.smsModel ? result.smsModel.applicable ? 'Checked with scam rules and the on-device SMS model.' : 'Scam rules checked. This text is outside the SMS model’s length or vocabulary limits.' : 'Checked with scam and link rules. The SMS model is not used for email.';
+  const method = result.language !== 'en' ? `${result.translation ? 'Native and English translation request rules' : 'Native request rules'}, plus original-link checks. The English text and email models were skipped.` : result.coverage === 'limited' ? 'Partial wording and link checks. The English models were skipped because the writing system did not match.' : result.model?.applicable ? `Checked with scam rules and the on-device ${result.model.kind} model.` : `Scam rules checked. This message is outside the ${result.model?.kind ?? 'learned'} model’s length or vocabulary limits.`;
   analysis.append(el('p', 'analysis-method', method));
   const findingHeader = el('div', 'findings-title', result.findings.length ? `${result.findings.length} ${result.findings.length === 1 ? 'signal' : 'signals'} to review` : 'No matching signals');
   const copy = el('button', 'copy-button'); copy.type = 'button'; copy.append(icon('copy'), document.createTextNode('Copy report')); copy.addEventListener('click', () => copyReport(result, copy)); findingHeader.append(copy); analysis.append(findingHeader);
@@ -160,7 +162,7 @@ function render(result) {
     details.append(summary);
     const explanation = getFindingExplanation(finding, result);
     details.append(el('h3', 'explanation-label', 'What we found'), el('p', '', explanation.found));
-    if (finding.id !== 'sms-pattern') for (const evidence of finding.evidence) {
+    if (!isModelFinding(finding)) for (const evidence of finding.evidence) {
       const quote = el('blockquote');
       if (result.language !== 'en' || evidence.source === 'translation') quote.append(el('span', 'evidence-source', evidence.source === 'translation' ? 'English translation' : evidence.source === 'sender' ? 'Original sender' : 'Original message'));
       if (evidence.source === 'sender') quote.append(document.createTextNode('Sender: '));
@@ -169,8 +171,8 @@ function render(result) {
     details.append(el('h3', 'explanation-label', 'Why it matters'), el('p', '', explanation.why), el('h3', 'explanation-label', 'What you can do'), el('p', '', explanation.next), el('p', 'explanation-limit', `Keep in mind: ${explanation.limit}`));
     const technical = el('details', 'finding-technical'); technical.append(el('summary', '', 'How this was detected'));
     technical.append(el('p', '', `Method: ${explanation.method}. Category: ${explanation.family}.`), el('p', '', explanation.counted), el('p', '', explanation.technical));
-    if (finding.id === 'sms-pattern' && result.smsModel) technical.append(el('p', '', `The model’s decision value is ${result.smsModel.margin.toFixed(4)}, compared with its ${result.smsModel.threshold.toFixed(4)} threshold. These model numbers are not percentages. The threshold was selected on validation messages, separate from training and test messages.`));
-    if (finding.id === 'sms-pattern' && finding.evidence.length) technical.append(el('p', '', `Supporting word associations: ${finding.evidence.map(e => e.text).join(', ')}. These words are not suspicious on their own.`));
+    if (isModelFinding(finding) && result.model) technical.append(el('p', '', `The model’s decision value is ${result.model.margin.toFixed(4)}, compared with its ${result.model.threshold.toFixed(4)} threshold.${result.model.truncated ? ' Only the beginning of this long email was scored.' : ''} These model numbers are not percentages. The threshold was selected on validation messages, separate from training and test messages.`));
+    if (isModelFinding(finding) && finding.evidence.length) technical.append(el('p', '', `Supporting word associations: ${finding.evidence.map(e => e.text).join(', ')}. These words are not suspicious on their own.`));
     details.append(technical); analysis.append(details);
   }
   if (!result.findings.length) analysis.append(el('p', 'no-findings', 'No configured warning signals matched. Sender authenticity, link reputation, and attachments have not been checked.'));
@@ -210,10 +212,10 @@ form.addEventListener('submit', event => {
   }
 });
 async function copyReport(result, button) {
-  const report = ['SignalCheck — message analysis', `Detector version: ${result.version}`, `Message type: ${result.type}`, `Message language: ${languageName(result.language)}`, `Coverage: ${result.coverage}. ${result.languageNotice}`, `Translation: ${result.translation ? result.translationOrigin + '; English rules used; English SMS model skipped' : 'not used'}`, `Concern: ${result.label}`, `Signal points: ${result.score}/100. This is not a percentage chance of a scam.`, 'Related signals share a limit; the displayed total is capped at 100.', result.smsModel ? `Local SMS model: ${result.smsModel.applicable ? 'screened' : 'outside length or vocabulary limits'}` : 'SMS model not used for this message.', '', ...result.findings.map(f => {
+  const report = ['SignalCheck — message analysis', `Detector version: ${result.version}`, `Message type: ${result.type}`, `Message language: ${languageName(result.language)}`, `Coverage: ${result.coverage}. ${result.languageNotice}`, `Translation: ${result.translation ? result.translationOrigin + '; English rules used; English text and email models skipped' : 'not used'}`, `Concern: ${result.label}`, `Signal points: ${result.score}/100. This is not a percentage chance of a scam.`, 'Related signals share a limit; the displayed total is capped at 100.', result.model ? `Local ${result.model.kind} model (${result.model.version}): ${result.model.applicable ? result.model.matched ? 'matched' : 'screened, no match' : 'outside length or vocabulary limits'}` : 'Learned models not used for this message.', '', ...result.findings.map(f => {
     const copy = getFindingExplanation(f, result);
-    return `${f.title}\nWhat we found: ${copy.found}\n${f.evidence.map(e => `${e.source === 'translation' ? 'English translation evidence' : f.id === 'sms-pattern' ? 'Supporting word association' : 'Original matched text'}: ${e.text}`).join('\n')}\nWhy it matters: ${copy.why}\nWhat you can do: ${copy.next}\nKeep in mind: ${copy.limit}\nTechnical detail: ${copy.counted} ${copy.technical}`;
-  }), '', 'Next steps:', ...result.actions.map((action, i) => `${i + 1}. ${action}`), '', 'Limitations: English, Spanish, and Chinese request rules; an English-only older-data SMS spam model. Multilingual and translated messages have no independent accuracy benchmark. Translation can alter meaning. Spam labels do not establish phishing detection accuracy. No sender authentication, attachment scan, or live link reputation check. A low score does not mean safe. False positives and missed scams are possible.'].join('\n');
+    return `${f.title}\nWhat we found: ${copy.found}\n${f.evidence.map(e => `${e.source === 'translation' ? 'English translation evidence' : isModelFinding(f) ? 'Supporting word association' : 'Original matched text'}: ${e.text}`).join('\n')}\nWhy it matters: ${copy.why}\nWhat you can do: ${copy.next}\nKeep in mind: ${copy.limit}\nTechnical detail: ${copy.counted} ${copy.technical}`;
+  }), '', 'Next steps:', ...result.actions.map((action, i) => `${i + 1}. ${action}`), '', 'Limitations: English, Spanish, and Chinese request rules; English-only text and email models trained on public spam, smishing, and phishing corpora (mostly older data). Multilingual and translated messages have no independent accuracy benchmark. Translation can alter meaning. Spam labels do not establish phishing detection accuracy. No sender authentication, attachment scan, or live link reputation check. A low score does not mean safe. False positives and missed scams are possible.'].join('\n');
   try {
     if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
     await navigator.clipboard.writeText(report);

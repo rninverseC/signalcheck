@@ -23,7 +23,7 @@ test('displayed link explanation distinguishes the visible address and destinati
 });
 test('model explanation distinguishes spam resemblance from sender verification', () => {
   const result = analyzeMessage(SAMPLES.bank);
-  const copy = getFindingExplanation(result.findings.find(f => f.id === 'sms-pattern'), result);
+  const copy = getFindingExplanation(result.findings.find(f => f.id === 'text-pattern'), result);
   assert.match(copy.limit, /advertising rather than a scam/);
   assert.match(copy.limit, /does not know who sent/);
 });
@@ -49,7 +49,7 @@ test('guided practice separates a dangerous request from a code and an ordinary 
   assert.equal(analyzeMessage(SAMPLES.otp).findings.some(f => f.id === 'credentials'), false);
 });
 test('all configured rules and structural checks have plain-language guidance', () => {
-  const ids = new Set([...RULES.map(rule => rule.id), 'short-link', 'http-link', 'ip-link', 'userinfo-link', 'unicode-link', 'lookalike-link', 'brand-link', 'displayed-link', 'brand-sender', 'login-link', 'toll-payment', 'sms-pattern']);
+  const ids = new Set([...RULES.map(rule => rule.id), 'short-link', 'http-link', 'ip-link', 'userinfo-link', 'unicode-link', 'lookalike-link', 'brand-link', 'displayed-link', 'brand-sender', 'login-link', 'toll-payment', 'text-pattern', 'email-pattern']);
   for (const id of ids) {
     assert.ok(EXPLANATIONS[id], id);
     for (const field of ['why','next','limit']) assert.ok(EXPLANATIONS[id][field].length > 20, `${id}.${field}`);

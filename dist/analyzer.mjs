@@ -1,12 +1,12 @@
-import { RULES } from './rules.mjs?v=3.0.0';
-import { normalizeText, originalEvidence, isNegated } from './text-utils.mjs?v=3.0.0';
-import { BRANDS, SHORTENERS, extractLinks, isWithin, claimedBrands, lookalikeBrands, displayedLinkMismatches } from './link-checks.mjs?v=3.0.0';
-import { classifySms } from './sms-classifier.mjs?v=3.0.0';
+import { RULES } from './rules.mjs?v=3.1.0';
+import { normalizeText, originalEvidence, isNegated } from './text-utils.mjs?v=3.1.0';
+import { BRANDS, SHORTENERS, extractLinks, isWithin, claimedBrands, lookalikeBrands, displayedLinkMismatches } from './link-checks.mjs?v=3.1.0';
+import { classifyMessage } from './message-classifier.mjs?v=3.1.0';
 
-import { LANGUAGES, LANGUAGE_RULES, languageName, isLanguageNegated, sourceScriptMismatch } from './languages.mjs?v=3.0.0';
+import { LANGUAGES, LANGUAGE_RULES, languageName, isLanguageNegated, sourceScriptMismatch } from './languages.mjs?v=3.1.0';
 
 export { RULES, extractLinks };
-export const VERSION = '3.0.0';
+export const VERSION = '3.1.0';
 export const MAX_LENGTH = 20000;
 // Related signals share a budget: a sender mismatch and a link mismatch do
 // not count as two independent identities. Weights remain design choices.
@@ -106,25 +106,25 @@ export function analyzeMessage({ message, sender = '', type = 'email', language 
     }
   }
 
-  // Training/evaluation used English SMS. Translation output has a different
-  // distribution, so do not claim model coverage for non-English input.
-  const smsModel = type === 'text' && language === 'en' && !limited ? classifySms(text) : null;
-  if (smsModel?.matched) {
-    const evidence = [];
-    for (const clue of smsModel.clues) {
-      const escaped = clue.split(' ').join('\\W+');
-      const match = new RegExp(`\\b${escaped}\\b`, 'i').exec(normalized.text);
-      if (match && !isNegated(normalized.text, match.index)) evidence.push(originalEvidence(normalized, match.index, match.index + match[0].length));
-      if (evidence.length === 3) break;
-    }
-    if (evidence.length) {
-      const displayEvidence = [];
-      for (const clue of smsModel.contentClues) {
-        const match = new RegExp(`\\b${clue.split(' ').join('\\W+')}\\b`, 'i').exec(normalized.text);
-        if (match && !isNegated(normalized.text, match.index)) displayEvidence.push(originalEvidence(normalized, match.index, match.index + match[0].length));
-        if (displayEvidence.length === 3) break;
-      }
-      add('sms-pattern', 'Wording resembles unsolicited SMS messages', 16, 'offer', 'A small model trained on older public SMS spam examples matched the whole message’s wording pattern. Any excerpts are supporting word associations, not proof that individual words are suspicious. Spam can include advertising, not just scams. This is not a fraud probability and is not evaluated on email.', displayEvidence, 'local SMS model');
+  // An unencrypted link only adds points when the message asks for action or
+  // details; on its own it is common in older ordinary mail.
+  const httpLink = findings.find(finding => finding.id === 'http-link');
+  if (httpLink && !findings.some(finding => finding.group === 'sensitive' || finding.group === 'money') && !(actionWords.test(normalized.text) || (english && actionWords.test(english)))) {
+    Object.assign(httpLink, { baseWeight: 0, weight: 0, explanation: `${httpLink.explanation} The message does not ask you to act on a link or share sign-in, personal, or payment details, so this adds no points.` });
+  }
+
+  // Both models were trained and evaluated on English messages. Translation
+  // output has a different distribution, so skip them for non-English input.
+  const model = language === 'en' && !limited ? classifyMessage(text, type === 'text' ? 'text' : 'email') : null;
+  if (model?.matched) {
+    const findClue = clue => {
+      const match = new RegExp(`\\b${clue.split(' ').join('\\W+')}\\b`, 'i').exec(normalized.text);
+      return match && !isNegated(normalized.text, match.index) ? originalEvidence(normalized, match.index, match.index + match[0].length) : null;
+    };
+    if (model.clues.some(findClue)) {
+      const displayEvidence = model.contentClues.map(findClue).filter(Boolean).slice(0, 3);
+      if (model.kind === 'text') add('text-pattern', 'Wording resembles spam or smishing texts', 16, 'offer', 'A small model trained on public spam and smishing text messages matched the whole message’s wording pattern. Any excerpts are supporting word associations, not proof that individual words are suspicious. Spam can include advertising, not just scams. This is not a fraud probability.', displayEvidence, 'local text model');
+      else add('email-pattern', 'Wording resembles spam or phishing emails', 16, 'offer', 'A small model trained on public spam and phishing emails matched the whole message’s wording pattern. Any excerpts are supporting word associations, not proof that individual words are suspicious. Spam can include advertising, and real account notices can use similar words. This is not a fraud probability.', displayEvidence, 'local email model');
     }
   }
 
@@ -142,7 +142,7 @@ export function analyzeMessage({ message, sender = '', type = 'email', language 
     : level === 'medium'
       ? ['Check whether you expected this message and recognize the context.', 'Verify unusual requests through an official app or a trusted contact.', 'Avoid sharing sensitive details until you have verified the sender.']
       : ['A low score does not confirm that the message is safe.', 'Verify unexpected links, payments, or requests using a source you already trust.', 'Consider the context: were you expecting this message?'];
-  return { message: text, sender: senderText, senderDomain, type, score, level, label: limited && level !== 'high' ? 'Limited check' : labels[level], findings, links, actions, version: VERSION, smsModel, language, translation: english, translationOrigin: english ? translationOrigin : null, coverage: limited ? 'limited' : english ? 'translation-assisted' : 'direct', languageNotice: limited ? 'Some passages use a different writing system from the selected language. Only partial checks ran. Choose the correct language or provide an English translation; a low points total is not a complete assessment.' : language === 'en' ? 'English rules checked. The SMS model is used only for eligible English texts.' : `${languageName(language)} request patterns and original links checked${english ? ', with English rules also applied to the translation' : ''}. These starter checks have no independent multilingual accuracy benchmark. The English SMS model was skipped.` };
+  return { message: text, sender: senderText, senderDomain, type, score, level, label: limited && level !== 'high' ? 'Limited check' : labels[level], findings, links, actions, version: VERSION, model, language, translation: english, translationOrigin: english ? translationOrigin : null, coverage: limited ? 'limited' : english ? 'translation-assisted' : 'direct', languageNotice: limited ? 'Some passages use a different writing system from the selected language. Only partial checks ran. Choose the correct language or provide an English translation; a low points total is not a complete assessment.' : language === 'en' ? `English rules checked${model ? ` with the local ${model.kind} model` : ''}.` : `${languageName(language)} request patterns and original links checked${english ? ', with English rules also applied to the translation' : ''}. These starter checks have no independent multilingual accuracy benchmark. The English text and email models were skipped.` };
 }
 
 export function highlightRanges(result) {

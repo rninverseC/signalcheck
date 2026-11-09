@@ -1,0 +1,391 @@
+{
+  "text": {
+    "model": "text-tfidf-logistic-2",
+    "exported_file": "dist/text-model.mjs",
+    "model_bytes": 156301,
+    "sources": [
+      "mendeley-smishing",
+      "uci-sms"
+    ],
+    "source_rows": {
+      "uci-sms/ham": 4827,
+      "uci-sms/spam": 747,
+      "mendeley-smishing/ham": 4844,
+      "mendeley-smishing/smishing": 638,
+      "mendeley-smishing/spam": 489
+    },
+    "unique_groups_kept": 5858,
+    "conflicting_groups_removed": 0,
+    "split_seed": "signalcheck-sms-group-split-v1",
+    "split": "70/15/15 stable SHA256 groups, not exact proportions",
+    "grouping": "case/punctuation/URL/address/number-normalized templates; one row kept per group; not all paraphrases deduplicated",
+    "feature_count": 4000,
+    "excluded_identity_terms": [],
+    "minimum_corpora_per_feature": 0,
+    "regularization_C": 8.0,
+    "threshold": -1.337275785087753,
+    "threshold_rule": "highest validation recall with false-positive rate <= 0.01",
+    "test_used_for_training_or_threshold_selection": false,
+    "training_libraries": {
+      "numpy": "2.4.3",
+      "scikit-learn": "1.9.0"
+    },
+    "split_counts": {
+      "train": {
+        "messages": 4092,
+        "labels": {
+          "ordinary": 3459,
+          "suspicious": 633
+        }
+      },
+      "validation": {
+        "messages": 845,
+        "labels": {
+          "suspicious": 129,
+          "ordinary": 716
+        }
+      },
+      "test": {
+        "messages": 921,
+        "labels": {
+          "ordinary": 774,
+          "suspicious": 147
+        }
+      }
+    },
+    "eligibility": {
+      "rule": {
+        "maxTokens": 180,
+        "minimumTokens": null,
+        "minimumKnownTokens": 3
+      },
+      "note": "Messages outside these limits are not scored by the model and count as unflagged in the metrics below.",
+      "train_eligible_share": 0.97165,
+      "validation_eligible_share": 0.96686,
+      "test_eligible_share": 0.96743
+    },
+    "validation": {
+      "messages": 845,
+      "ordinary": 716,
+      "suspicious": 129,
+      "true_positive": 121,
+      "false_positive": 3,
+      "true_negative": 713,
+      "false_negative": 8,
+      "precision": 0.97581,
+      "recall": 0.93798,
+      "false_positive_rate": 0.00419,
+      "accuracy": 0.98698
+    },
+    "test_model_only": {
+      "messages": 921,
+      "ordinary": 774,
+      "suspicious": 147,
+      "true_positive": 137,
+      "false_positive": 4,
+      "true_negative": 770,
+      "false_negative": 10,
+      "precision": 0.97163,
+      "recall": 0.93197,
+      "false_positive_rate": 0.00517,
+      "accuracy": 0.9848
+    },
+    "test_by_source": {
+      "mendeley-smishing/ham": {
+        "messages": 76,
+        "flagged": 1,
+        "false_positive_rate": 0.01316
+      },
+      "mendeley-smishing/smishing": {
+        "messages": 23,
+        "flagged": 22,
+        "recall": 0.95652
+      },
+      "mendeley-smishing/spam": {
+        "messages": 28,
+        "flagged": 26,
+        "recall": 0.92857
+      },
+      "uci-sms/ham": {
+        "messages": 698,
+        "flagged": 3,
+        "false_positive_rate": 0.0043
+      },
+      "uci-sms/spam": {
+        "messages": 96,
+        "flagged": 89,
+        "recall": 0.92708
+      }
+    },
+    "strongest_suspicious_features": [
+      "__number__",
+      "__url__",
+      "call __number__",
+      "to __number__",
+      "__number__ __number__",
+      "free",
+      "your",
+      "to",
+      "reply",
+      "text",
+      "call",
+      "txt",
+      "__money__",
+      "__money__ __number__",
+      "uk",
+      "chat",
+      "service",
+      "contact",
+      "sms",
+      "mobile",
+      "claim",
+      "stop",
+      "__number__ now",
+      "now",
+      "customer"
+    ],
+    "strongest_ordinary_features": [
+      "my",
+      "right",
+      "that",
+      "can",
+      "but",
+      "lt",
+      "gt",
+      "me",
+      "hey",
+      "come",
+      "lt gt",
+      "how",
+      "got",
+      "work",
+      "ok",
+      "later",
+      "that __number__",
+      "it",
+      "then",
+      "at __number__",
+      "good",
+      "he",
+      "my work",
+      "going to",
+      "da"
+    ]
+  },
+  "email": {
+    "model": "email-tfidf-logistic-1",
+    "exported_file": "dist/email-model.mjs",
+    "model_bytes": 237695,
+    "sources": [
+      "enron-spam",
+      "llmgen-phishing",
+      "nazario-phishing",
+      "spamassassin"
+    ],
+    "source_rows": {
+      "nazario-phishing/phishing": 8432,
+      "spamassassin/spam": 1896,
+      "enron-spam/ham": 16545,
+      "enron-spam/spam": 17120,
+      "spamassassin/ham": 4150,
+      "llmgen-phishing/phishing": 2477,
+      "llmgen-phishing/ham": 1269
+    },
+    "unique_groups_kept": 43264,
+    "conflicting_groups_removed": 1,
+    "split_seed": "signalcheck-sms-group-split-v1",
+    "split": "70/15/15 stable SHA256 groups, not exact proportions",
+    "grouping": "case/punctuation/URL/address/number-normalized first 64 tokens; one row kept per group; not all paraphrases deduplicated",
+    "feature_count": 6000,
+    "excluded_identity_terms": [
+      "cnet",
+      "daren",
+      "dave",
+      "ect",
+      "enron",
+      "exmh",
+      "hou",
+      "ilug",
+      "jim",
+      "kaminski",
+      "louise",
+      "razor",
+      "sally",
+      "sf",
+      "sourceforge",
+      "spamassassin",
+      "sponsor",
+      "sponsored",
+      "steve",
+      "tom",
+      "vince",
+      "zzzz"
+    ],
+    "minimum_corpora_per_feature": 2,
+    "regularization_C": 16.0,
+    "threshold": 1.3417602475013255,
+    "threshold_rule": "highest validation recall with false-positive rate <= 0.01",
+    "test_used_for_training_or_threshold_selection": false,
+    "training_libraries": {
+      "numpy": "2.4.3",
+      "scikit-learn": "1.9.0"
+    },
+    "split_counts": {
+      "train": {
+        "messages": 30012,
+        "labels": {
+          "suspicious": 16277,
+          "ordinary": 13735
+        }
+      },
+      "validation": {
+        "messages": 6388,
+        "labels": {
+          "suspicious": 3452,
+          "ordinary": 2936
+        }
+      },
+      "test": {
+        "messages": 6438,
+        "labels": {
+          "suspicious": 3437,
+          "ordinary": 3001
+        }
+      }
+    },
+    "eligibility": {
+      "rule": {
+        "maxTokens": null,
+        "minimumTokens": 20,
+        "minimumKnownTokens": 5
+      },
+      "note": "Messages outside these limits are not scored by the model and count as unflagged in the metrics below.",
+      "train_eligible_share": 0.95039,
+      "validation_eligible_share": 0.94881,
+      "test_eligible_share": 0.94936
+    },
+    "validation": {
+      "messages": 6388,
+      "ordinary": 2936,
+      "suspicious": 3452,
+      "true_positive": 3100,
+      "false_positive": 29,
+      "true_negative": 2907,
+      "false_negative": 352,
+      "precision": 0.99073,
+      "recall": 0.89803,
+      "false_positive_rate": 0.00988,
+      "accuracy": 0.94036
+    },
+    "test_model_only": {
+      "messages": 6438,
+      "ordinary": 3001,
+      "suspicious": 3437,
+      "true_positive": 3083,
+      "false_positive": 29,
+      "true_negative": 2972,
+      "false_negative": 354,
+      "precision": 0.99068,
+      "recall": 0.897,
+      "false_positive_rate": 0.00966,
+      "accuracy": 0.94051
+    },
+    "test_by_source": {
+      "enron-spam/ham": {
+        "messages": 2166,
+        "flagged": 15,
+        "false_positive_rate": 0.00693
+      },
+      "enron-spam/spam": {
+        "messages": 2021,
+        "flagged": 1780,
+        "recall": 0.88075
+      },
+      "llmgen-phishing/ham": {
+        "messages": 181,
+        "flagged": 2,
+        "false_positive_rate": 0.01105
+      },
+      "llmgen-phishing/phishing": {
+        "messages": 381,
+        "flagged": 379,
+        "recall": 0.99475
+      },
+      "nazario-phishing/phishing": {
+        "messages": 843,
+        "flagged": 752,
+        "recall": 0.89205
+      },
+      "spamassassin/ham": {
+        "messages": 654,
+        "flagged": 12,
+        "false_positive_rate": 0.01835
+      },
+      "spamassassin/spam": {
+        "messages": 192,
+        "flagged": 172,
+        "recall": 0.89583
+      }
+    },
+    "strongest_suspicious_features": [
+      "your",
+      "account",
+      "hello",
+      "alert",
+      "remove",
+      "below",
+      "urgent",
+      "ebay",
+      "over __number__",
+      "here",
+      "important",
+      "huge",
+      "kindly",
+      "bank",
+      "online",
+      "otc",
+      "low",
+      "viagra",
+      "you",
+      "vi",
+      "watch",
+      "brand",
+      "girls",
+      "gold",
+      "our"
+    ],
+    "strongest_ordinary_features": [
+      "wrote",
+      "url __url__",
+      "the",
+      "attached",
+      "to",
+      "employees",
+      "url",
+      "john",
+      "energy",
+      "gas",
+      "congratulations",
+      "doc",
+      "yesterday",
+      "forwarded",
+      "here is",
+      "chris",
+      "feature",
+      "writes",
+      "tap",
+      "subscription",
+      "that",
+      "ken",
+      "power",
+      "shirley",
+      "october __number__"
+    ],
+    "future_phishing_holdout": {
+      "description": "Nazario phishing-2025 templates not seen in earlier years; excluded from training, validation, and test. Recall only: there is no matching 2025 ordinary mail.",
+      "messages": 426,
+      "flagged": 356,
+      "recall": 0.83568
+    }
+  }
+}

@@ -1,6 +1,6 @@
 # Understand SignalCheck, one piece at a time
 
-Start here: the project combines a **checklist**, a **learned SMS pattern check**, and a **points total**. It explains why a message deserves a second look. It does not prove who sent it or whether it is a scam.
+Start here: the project combines a **checklist**, **learned text and email pattern checks**, and a **points total**. It explains why a message deserves a second look. It does not prove who sent it or whether it is a scam.
 
 ## Your first five-minute test
 
@@ -32,19 +32,19 @@ Use the **Spanish request** and **Chinese request** sample buttons, then check t
 
 Choose the matching language for your own message. Chinese rules include both Simplified and Traditional writing. These are starter patterns; there is no independent accuracy benchmark for them.
 
-Optionally open **Add an English translation**. Translate on-device if your browser supports it, or paste a translation yourself. Review it, then press **Check this message**. You can compare original and translation in the results. English rules may find additional wording; the trained SMS model is skipped. Findings label translation evidence separately, and link checks use the original addresses.
+Optionally open **Add an English translation**. Translate on-device if your browser supports it, or paste a translation yourself. Review it, then press **Check this message**. You can compare original and translation in the results. English rules may find additional wording; the trained text and email models are skipped. Findings label translation evidence separately, and link checks use the original addresses.
 
-Why skip the SMS model? It learned wording from English texts. A machine translation has a different style and can change meaning. Its existing benchmark cannot tell us how well it would perform on translated text.
+Why skip the learned models? They learned wording from English messages. A machine translation has a different style and can change meaning. Its existing benchmark cannot tell us how well it would perform on translated text.
 
 Read: `dist/languages.mjs` and `dist/translator.mjs`.
 
 Explain it in your own words: what could go wrong if a translator changes “do not share your code” into a request to share it?
 
-## 2. The SMS model learns from examples
+## 2. The text and email models learn from examples
 
-We trained it on a public collection of text messages labeled ordinary or spam. It learns word-pattern associations with those labels. When you paste an eligible short English text, the browser uses saved model weights to compare its wording with those associations.
+There are two models. The text model was trained on public text messages labeled ordinary, spam, or smishing (phishing by text). The email model was trained on public emails labeled ordinary, spam, or phishing. Each learns word-pattern associations with those labels. When you paste an eligible English message, the browser uses the matching model's saved weights to compare its wording with those associations.
 
-It does not remember your messages, learn from them during use, or contact a paid AI service. Email uses the checklist rules without this SMS model. Spam includes unwanted advertising, so “resembles spam” is not the same as “is a scam.”
+They do not remember your messages, learn from them during use, or contact a paid AI service. Spam includes unwanted advertising, so “resembles spam” is not the same as “is a scam.”
 
 The technical pipeline is:
 
@@ -56,9 +56,9 @@ The technical pipeline is:
 
 In this implementation, term frequency is `1 + log(count)`. Each feature is multiplied by its saved inverse-document-frequency value, then the feature vector is normalized. The decision value is the intercept plus the weighted feature sum. The website does not display that value as a fraud probability.
 
-The model has 4,000 features. It is used only for English texts of up to 180 tokens with at least three known vocabulary tokens. Its positive word associations help explain a match, but a word such as “account” is not suspicious by itself.
+The text model has 4,000 features and is used for English texts of up to 180 tokens with at least three known vocabulary tokens. The email model has 6,000 features and is used for English emails of at least 20 tokens; it scores the first 400. Very short emails are left to the checklist because a word-count model sees too little context. Its positive word associations help explain a match, but a word such as “account” is not suspicious by itself.
 
-Read: `dist/sms-classifier.mjs`, `dist/sms-model.mjs`, and `scripts/train_sms_model.py`.
+Read: `dist/message-classifier.mjs`, `scripts/train_models.py`, and `research/data-sources.json`.
 
 Explain it in your own words: how does a checklist differ from learning patterns from labeled examples?
 
@@ -86,20 +86,22 @@ Training examples teach the vocabulary and model coefficients. Validation exampl
 
 If you repeatedly change the model to fit its test messages, those messages stop being a fair independent check. This project removes duplicates and keeps normalized message templates together before splitting, though similar paraphrases can still escape the grouping.
 
-The held-out test includes 100 spam and 700 ordinary messages:
+The email model's held-out test includes 3,437 spam or phishing emails and 3,001 ordinary emails:
 
 | Actual message | Flagged | Not flagged |
 | --- | ---: | ---: |
-| Spam | 94 | 6 |
-| Ordinary | 8 | 692 |
+| Spam or phishing | 3,083 | 354 |
+| Ordinary | 29 | 2,972 |
 
-- A **false positive** is an ordinary message flagged: 8 here.
-- A **false negative** is a spam message missed: 6 here.
-- **Recall** asks “how much of the spam did we flag?”: 94/100 = 94%.
-- **Precision** asks “how much of what we flagged was labeled spam?”: 94/(94+8) ≈ 92.2%.
-- The ordinary-message false-positive rate is 8/700 ≈ 1.14%.
+- A **false positive** is an ordinary message flagged: 29 here.
+- A **false negative** is a suspicious message missed: 354 here.
+- **Recall** asks “how much of the suspicious mail did we flag?”: 3,083/3,437 ≈ 89.7%.
+- **Precision** asks “how much of what we flagged was labeled suspicious?”: 3,083/(3,083+29) ≈ 99.1%.
+- The ordinary-message false-positive rate is 29/3,001 ≈ 1.0%.
 
-These figures describe older SMS spam labels. They do not establish modern phishing or email detection accuracy. The authored scenarios and guided examples were used during development; they are not independent accuracy evidence.
+The text model's test (147 suspicious, 774 ordinary) flagged 137 suspicious and 4 ordinary texts.
+
+These figures describe public, mostly older corpora plus one synthetic modern set. They do not establish how well the checker detects today's scams. The ordinary and phishing emails also come from different collections, so part of what the model learned may be collection style rather than scam wording. The authored scenarios and guided examples were used during development; they are not independent accuracy evidence.
 
 Read: `MODEL_CARD.md`, `research/detector-evaluation.json`, and `scripts/evaluate-detector.mjs`.
 
@@ -107,6 +109,6 @@ Explain it in your own words: why can a detector with high overall accuracy stil
 
 ## A clear way to describe the project
 
-“SignalCheck combines explainable scam rules with an on-device SMS spam model. It highlights the request or link pattern that matched, explains its risk, and suggests an independent way to check it. The detector was evaluated on held-out public SMS data, with both missed spam and false alarms documented. Its score is a warning-points total, not a fraud probability.”
+“SignalCheck combines explainable scam rules with on-device text and email models trained on public spam, smishing, and phishing data. It highlights the request or link pattern that matched, explains its risk, and suggests an independent way to check it. The detector was evaluated on held-out public text and email data, with both missed scams and false alarms documented. Its score is a warning-points total, not a fraud probability.”
 
 Use only the parts that match work you actually understand and contributed to; credit AI assistance according to your application’s requirements. A useful next contribution is to keep a testing notebook, investigate a confusing result, propose a specific change, and evaluate whether it helps without creating new false alarms.

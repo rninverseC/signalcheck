@@ -1,0 +1,185 @@
+{
+  "note": "Public corpora used for local training only. Raw files are downloaded to research/data/raw (ignored by Git) and never shipped to browsers. Copyright in message text remains with the original senders.",
+  "sources": [
+    {
+      "id": "uci-sms",
+      "model": "text",
+      "title": "UCI SMS Spam Collection (Almeida & Hidalgo)",
+      "license": "CC BY 4.0",
+      "citation": "https://doi.org/10.24432/C5CC84",
+      "files": [
+        {
+          "url": "https://archive.ics.uci.edu/static/public/228/sms%2Bspam%2Bcollection.zip",
+          "extract": "SMSSpamCollection",
+          "name": "SMSSpamCollection",
+          "sha256": "7d039a24a6083ed9ef0f806ebad56bbb976e3aeb8de05669173bfdc4996c239d"
+        }
+      ]
+    },
+    {
+      "id": "mendeley-smishing",
+      "model": "text",
+      "title": "SMS Phishing Dataset for Machine Learning and Pattern Recognition (Mishra & Soni)",
+      "license": "CC BY 4.0",
+      "citation": "https://doi.org/10.17632/f45bkkt8pr.1",
+      "files": [
+        {
+          "url": "https://data.mendeley.com/public-files/datasets/f45bkkt8pr/files/edb361de-918d-469f-9106-e84823830665/file_downloaded",
+          "name": "Dataset_5971.zip",
+          "sha256": "9bbf3188fdad81495d8e82825648b9b63b53fc86841a3d26c02629990b233cc3"
+        }
+      ]
+    },
+    {
+      "id": "spamassassin",
+      "model": "email",
+      "title": "Apache SpamAssassin public corpus",
+      "license": "Published for anti-spam research; copyright remains with original senders",
+      "citation": "https://spamassassin.apache.org/old/publiccorpus/",
+      "files": [
+        {
+          "url": "https://spamassassin.apache.org/old/publiccorpus/20030228_easy_ham.tar.bz2",
+          "name": "20030228_easy_ham.tar.bz2",
+          "sha256": "2b7b65904bcfcc31d2b5f51946f2d261370b257402cbbd62930b46ab83367438"
+        },
+        {
+          "url": "https://spamassassin.apache.org/old/publiccorpus/20030228_easy_ham_2.tar.bz2",
+          "name": "20030228_easy_ham_2.tar.bz2",
+          "sha256": "b4bd3dc5ae5b40f38e99a0e41ad7d16b428b56e818e3a6ffa07330d62004dd38"
+        },
+        {
+          "url": "https://spamassassin.apache.org/old/publiccorpus/20030228_hard_ham.tar.bz2",
+          "name": "20030228_hard_ham.tar.bz2",
+          "sha256": "ce2ce67880643dbde65ea7f85bffbfe4417349c4bd80b6b0de56262ae6b0a9c9"
+        },
+        {
+          "url": "https://spamassassin.apache.org/old/publiccorpus/20030228_spam.tar.bz2",
+          "name": "20030228_spam.tar.bz2",
+          "sha256": "c08debc32413804949a866be45ef78195cec2cbafd1da744ed76cdb860589743"
+        },
+        {
+          "url": "https://spamassassin.apache.org/old/publiccorpus/20050311_spam_2.tar.bz2",
+          "name": "20050311_spam_2.tar.bz2",
+          "sha256": "44280a0e28bf7645b2279e8e42659271ad82c6f40bf8d364dbda7f1df344a765"
+        }
+      ]
+    },
+    {
+      "id": "enron-spam",
+      "model": "email",
+      "title": "Enron-Spam (Metsis, Androutsopoulos & Paliouras), CSV packaging by M. Wiechmann",
+      "license": "No explicit license; published for anti-spam research. Ham comes from the Enron email corpus released publicly during the FERC investigation",
+      "citation": "https://github.com/MWiechmann/enron_spam_data",
+      "files": [
+        {
+          "url": "https://huggingface.co/datasets/SetFit/enron_spam/resolve/main/enron_spam_data.csv",
+          "name": "enron_spam_data.csv",
+          "sha256": "009c86359b5bd6ec142a9b9ca85075ec864fd8c7c1c378c9a430e9427d0f7d57"
+        }
+      ]
+    },
+    {
+      "id": "nazario-phishing",
+      "model": "email",
+      "title": "Nazario phishing corpus (hand-classified phishing emails, 2005-2025)",
+      "license": "CC BY 4.0",
+      "citation": "https://monkey.org/~jose/phishing/",
+      "files": [
+        {
+          "url": "https://monkey.org/~jose/phishing/phishing0.mbox",
+          "name": "phishing0.mbox",
+          "sha256": "6184b0a34ed8cbbb252676e21c1eab9eac5fa4be89c61e30cc9954ebbb25d848"
+        },
+        {
+          "url": "https://monkey.org/~jose/phishing/phishing1.mbox",
+          "name": "phishing1.mbox",
+          "sha256": "99f02474a11086408a5ce6d11ef38823f003c6611a4312c31fbee96773eeba28"
+        },
+        {
+          "url": "https://monkey.org/~jose/phishing/phishing2.mbox",
+          "name": "phishing2.mbox",
+          "sha256": "5113277984eae759a5ff958ccf408b542441ce033a49b923ab3b0f324075e6bd"
+        },
+        {
+          "url": "https://monkey.org/~jose/phishing/phishing3.mbox",
+          "name": "phishing3.mbox",
+          "sha256": "b29336d2e31c2dff19639415e98ed2aced5b4d63675ea5e29bea1a7d4e452841"
+        },
+        {
+          "url": "https://monkey.org/~jose/phishing/20051114.mbox",
+          "name": "20051114.mbox",
+          "sha256": "928cbf1c394d01d0b398ded8dc7cbd94dd4ce9cb0d4efdecd12696338c247926"
+        },
+        {
+          "url": "https://monkey.org/~jose/phishing/phishing-2015",
+          "name": "phishing-2015",
+          "sha256": "7523e62a5e6e4ee8134ab8b1a628e423097a7779e1003b28422864aa34f1c319"
+        },
+        {
+          "url": "https://monkey.org/~jose/phishing/phishing-2016",
+          "name": "phishing-2016",
+          "sha256": "42393e4d686193bfb879d1608c23fd4d3b698ccd4d73f0e1d2276ba709718483"
+        },
+        {
+          "url": "https://monkey.org/~jose/phishing/phishing-2017",
+          "name": "phishing-2017",
+          "sha256": "110fba876b38b44035bf065788952674bc68a7b6879c345a515a9ac844b1d704"
+        },
+        {
+          "url": "https://monkey.org/~jose/phishing/phishing-2018",
+          "name": "phishing-2018",
+          "sha256": "83f49cf2a76c7b29b205d22d8778e46848e36af0f15ee1df126a543696acd48d"
+        },
+        {
+          "url": "https://monkey.org/~jose/phishing/phishing-2019",
+          "name": "phishing-2019",
+          "sha256": "cab39d6fcb38cf80cdaabb3e6ffd1222777e2fcaac7e8480321b7f729c2e3c0e"
+        },
+        {
+          "url": "https://monkey.org/~jose/phishing/phishing-2020",
+          "name": "phishing-2020",
+          "sha256": "99e20bf25f5e8556d37103f2c8140cd75181a62d3df91df8acf9d9aece9f08bb"
+        },
+        {
+          "url": "https://monkey.org/~jose/phishing/phishing-2021",
+          "name": "phishing-2021",
+          "sha256": "636707cff42245d1482e4ae8a2c03369717a5e06bf9d1a0f4ec5dcd846661cee"
+        },
+        {
+          "url": "https://monkey.org/~jose/phishing/phishing-2022",
+          "name": "phishing-2022",
+          "sha256": "a6291e2cb990204766fce425423949b403cce4ae6a660fc8d08812e40a063fa7"
+        },
+        {
+          "url": "https://monkey.org/~jose/phishing/phishing-2023",
+          "name": "phishing-2023",
+          "sha256": "5007f1c1dc91b15e93e988afa3a1cf402e15c88f765d3057be8bfec50dae1fe8"
+        },
+        {
+          "url": "https://monkey.org/~jose/phishing/phishing-2024",
+          "name": "phishing-2024",
+          "sha256": "60afa40a2757170093a2bde31ec9cda4e54d33992203ce04bfbbc86d2e5e5b99"
+        },
+        {
+          "url": "https://monkey.org/~jose/phishing/phishing-2025",
+          "name": "phishing-2025",
+          "sha256": "f1fa7e0fe35c9a16f36d9aa20ade7e1d3908d1d0c1d917b8c53c8aa799ec1c8f"
+        }
+      ]
+    },
+    {
+      "id": "llmgen-phishing",
+      "model": "email",
+      "title": "LLM-Generated Phishing Email Dataset, English part (synthetic modern ordinary and phishing emails written by OpenAI models)",
+      "license": "Apache-2.0",
+      "citation": "https://huggingface.co/datasets/Dizzzy0x00/LLMGen-Phishing-Email-Dataset",
+      "files": [
+        {
+          "url": "https://huggingface.co/datasets/Dizzzy0x00/LLMGen-Phishing-Email-Dataset/resolve/main/GPT_Phishing_Email_dataset.csv",
+          "name": "GPT_Phishing_Email_dataset.csv",
+          "sha256": "e3a335c8acacec09afaa4b9a14c7010195063310e4dcfbae38c1fa50b8d48dc3"
+        }
+      ]
+    }
+  ]
+}

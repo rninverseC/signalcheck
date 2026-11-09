@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { analyzeMessage, extractLinks, highlightRanges, RULES } from '../dist/analyzer.mjs';
 import { scenarios } from './scenarios.mjs';
-import { classifySms } from '../dist/sms-classifier.mjs';
-import { SMS_MODEL } from '../dist/sms-model.mjs';
+import { classifyMessage, MODELS } from '../dist/message-classifier.mjs';
+import { emailScenarios } from './email-scenarios.mjs';
 const check = (message, sender, type) => analyzeMessage({ message, sender, type });
 const has = (result, id) => result.findings.some(f => f.id === id);
 
@@ -85,22 +85,51 @@ test('related pressure and identity evidence share a scoring budget', () => {
   assert.ok(pressure <= 24); assert.ok(identity <= 30);
 });
 test('model vocabulary keys cannot be mistaken for object prototypes', () => {
-  assert.ok(Number.isFinite(classifySms('constructor prototype toString ordinary message').margin));
+  for (const kind of ['text', 'email']) assert.ok(Number.isFinite(classifyMessage('constructor prototype toString hasOwnProperty ordinary message', kind).margin));
 });
-test('SMS model runs for short texts only, and never for email', () => {
-  assert.equal(check('Free reward: claim your prize now!', '', 'email').smsModel, null);
-  assert.equal(classifySms('hello '.repeat(181)).applicable, false);
-  assert.equal(classifySms('qzxv wqxz zqqv').applicable, false);
+test('text model runs for short texts only; email has its own model', () => {
+  assert.equal(check('Free reward: claim your prize now!', '', 'email').model.kind, 'email');
+  assert.equal(check('Free reward: claim your prize now!', '', 'text').model.kind, 'text');
+  assert.equal(classifyMessage('hello '.repeat(181), 'text').applicable, false);
+  assert.equal(classifyMessage('qzxv wqxz zqqv', 'text').applicable, false);
+  assert.throws(() => classifyMessage('hello', 'fax'), /Unknown model/);
 });
-test('classifier contributions reproduce the exported linear model', () => {
-  const word = Object.keys(SMS_MODEL.features).find(term => /^[a-z]+$/.test(term));
-  const [idf, coefficient] = SMS_MODEL.features[word];
-  assert.ok(idf > 0);
-  assert.ok(Math.abs(classifySms(word).margin - (SMS_MODEL.bias + coefficient)) < 1e-8);
+test('short emails are left to the rules instead of the email model', () => {
+  const result = check('Never share your password or move money to a safe account.', '', 'email');
+  assert.equal(result.model.applicable, false);
+  assert.equal(has(result, 'email-pattern'), false);
+});
+test('email model scores the beginning of long emails', () => {
+  const result = classifyMessage('please review the attached agenda for our meeting '.repeat(100), 'email');
+  assert.equal(result.truncated, true);
+  assert.equal(result.applicable, true);
+});
+test('classifier contributions reproduce each exported linear model', () => {
+  for (const [kind, model] of Object.entries(MODELS)) {
+    const word = Object.keys(model.features).find(term => /^[a-z]+$/.test(term));
+    const [idf, coefficient] = model.features[word];
+    assert.ok(idf > 0);
+    assert.ok(Math.abs(classifyMessage(word, kind).margin - (model.bias + coefficient)) < 1e-8, kind);
+  }
+});
+test('email model flags authored phishing and spares authored ordinary mail', () => {
+  for (const scenario of emailScenarios) {
+    const result = check(scenario.message, scenario.sender ?? '', 'email');
+    const flagged = result.findings.some(f => f.id === 'email-pattern');
+    assert.equal(flagged, scenario.label === 'suspicious', scenario.id);
+  }
 });
 test('model explanations exclude function-word-only excerpts', () => {
   const result = check('Fraud department: Transfer your savings to a safe account to protect it. Keep this confidential and do not contact your bank.', '', 'text');
-  const model = result.findings.find(f => f.id === 'sms-pattern');
+  const model = result.findings.find(f => f.id === 'text-pattern');
   assert.ok(model);
   for (const evidence of model.evidence) assert.ok(!/^(?:your|to|this|it|the|and)$/i.test(evidence.text));
+});
+
+test('an unencrypted link adds points only alongside a request to act or share details', () => {
+  const plain = analyzeMessage({ message: 'Notes from the meeting are posted at http://wiki.example.org/notes for anyone curious.', type: 'email' });
+  const plainLink = plain.findings.find(finding => finding.id === 'http-link');
+  assert.equal(plainLink.weight, 0);
+  const asks = analyzeMessage({ message: 'Please verify your account at http://wiki.example.org/notes today.', type: 'email' });
+  assert.equal(asks.findings.find(finding => finding.id === 'http-link').weight, 8);
 });
