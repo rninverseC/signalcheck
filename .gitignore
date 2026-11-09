@@ -8,3 +8,6 @@ __pycache__/
 .env
 .env.*
 !.env.example
+
+# Fine-tuned server model weights (~90 MB each); see server/README.md
+server/model/

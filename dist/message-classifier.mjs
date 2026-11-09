@@ -1,5 +1,5 @@
-import { TEXT_MODEL } from './text-model.mjs?v=3.1.0';
-import { EMAIL_MODEL } from './email-model.mjs?v=3.1.0';
+import { TEXT_MODEL } from './text-model.mjs?v=3.2.0';
+import { EMAIL_MODEL } from './email-model.mjs?v=3.2.0';
 
 export const MODELS = { text: TEXT_MODEL, email: EMAIL_MODEL };
 const vocabularies = new Map(Object.entries(MODELS).map(([kind, model]) => [kind, new Map(Object.entries(model.features))]));

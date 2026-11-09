@@ -1,5 +1,5 @@
 // Presentation only: these explanations never change a detector decision.
-import { displayedLinkMismatches } from './link-checks.mjs?v=3.1.0';
+import { displayedLinkMismatches } from './link-checks.mjs?v=3.2.0';
 const explain = (why, next, limit) => ({ why, next, limit });
 export const EXPLANATIONS = {
   credentials: explain('A password or sign-in code can give someone access to your account. A request to share one deserves a pause.', 'Do not send the password or code in a reply. If you need to sign in, open the official app yourself.', 'Entering a password in a real sign-in screen can be normal. This checker cannot verify who is asking.'),
